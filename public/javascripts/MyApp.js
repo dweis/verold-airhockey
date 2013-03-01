@@ -12,28 +12,31 @@ MyApp = function( veroldApp ) {
   this.puck = undefined;
   this.table = undefined;
 
-  this.socket = io.connect('http://localhost');
-
   this.width = window.innerWidth;
   this.height = window.innerHeight;
 
   this.tableWidth = 1.25;
   this.tableHeight = 2.5;
+
+  this.mode = 'spectator';
 }
 
 MyApp.prototype.setSpectatorView = function() {
   this.camera.position.set( -1.0, 1.8, 0 );
   this.lookAtTable();
+  this.mode = 'spectator';
 }
 
 MyApp.prototype.setPlayer1View = function() {
   this.camera.position.set( 0, 1.6, -1.3 );
   this.lookAtTable();
+  this.mode = 'p1';
 }
 
 MyApp.prototype.setPlayer2View = function() {
   this.camera.position.set( 0, 1.6, 1.3 );
   this.lookAtTable();
+  this.mode = 'p2';
 }
 
 MyApp.prototype.lookAtTable = function() {
@@ -79,13 +82,25 @@ MyApp.prototype.initScene = function(scene) {
 
   //Tell the engine to use this camera when rendering the scene.
   this.veroldApp.setActiveCamera( this.camera );
+
+  var that = this;
+  this.socket = io.connect('http://192.168.0.12');
+  this.socket.on('update', function() { that.socketUpdate.apply(that, arguments); });
+  this.socket.on('goal', function() { alert('goal'); });
+  this.socket.on('active', function(data) {
+    if (data.player == 'p1') {
+      that.setPlayer1View();
+    } else if (data.player == 'p2') {
+      that.setPlayer2View();
+    }
+  });
 }
 
 MyApp.prototype.socketUpdate = function(updateObj) {
   var that = this;
   var translate = function(obj, position, angle) {
-    obj.threeData.position.x = (position.x - (that.tableWidth * 0.5)) * 0.8;
-    obj.threeData.position.z = (position.y - (that.tableHeight * 0.5)) * 0.8;
+    obj.threeData.position.x = (position.x - (that.tableWidth * 0.5)) * 0.78;
+    obj.threeData.position.z = (position.y - (that.tableHeight * 0.5)) * 0.78;
   }
 
   if (this.table) {
@@ -106,17 +121,6 @@ MyApp.prototype.startup = function() {
     progress: function(sceneObj) {
       var percent = Math.floor((sceneObj.loadingProgress.loaded_hierarchy / sceneObj.loadingProgress.total_hierarchy)*100);
       that.veroldApp.setLoadingProgress(percent);
-    }
-  });
-
-  this.socket.on('update', function() { that.socketUpdate.apply(that, arguments); });
-  this.socket.on('goal', function() { alert('goal'); });
-  this.socket.on('active', function(data) {
-  console.log('DATA', data);
-    if (data.player == 'p1') {
-      that.setPlayer1View();
-    } else if (data.player == 'p2') {
-      that.setPlayer2View();
     }
   });
 }
@@ -148,21 +152,23 @@ MyApp.prototype.onMouseUp = function( event ) {
 }
 
 MyApp.prototype.onMouseMove = function(event) {
-  var x = event.clientX, y = event.clientY;
-
-  var minX = this.width / 3
+  var x = event.clientX
+    , y = event.clientY
+    , minX = this.width / 3
     , maxX = this.width - (this.width / 3)
     , minY = this.height / 2
-    , maxY = this.height
+    , maxY = this.height - 100
     , rangeX = maxX - minX
-    , rangeY = maxY - minY;
+    , rangeY = maxY - minY
+    , update
 
   if (y >= minY && y <= maxY && x >= minX && x <= maxX) {
-    var update = { x: ((x - minX) / rangeX)
-                 , y: ((y - minY) / rangeY) };
+    update = { x: ((x - minX) / rangeX)
+             , y: ((y - minY) / rangeY) };
 
-    console.log(update);
-    this.socket.emit('position', update);
+    if (this.mode == 'p1' || this.mode == 'p2') {
+      this.socket.emit('position', update);
+    }
   }
 }
 

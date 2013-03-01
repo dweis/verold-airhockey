@@ -35,7 +35,8 @@ var Game = function(io) {
   this.width = 1.25;
   this.height = 2.50;
   this.thickness = 0.01;
-  this.malletDiameter = 0.095;
+  //this.malletDiameter = 0.095;
+  this.malletDiameter = 0.15;
   this.puckDiameter = 0.073125;
 }
 

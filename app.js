@@ -41,4 +41,8 @@ io.sockets.on('connection', function (socket) {
   var player = { name: 'Derrick', socket: socket };
 
   game.addPlayer(player);
+
+  socket.on('disconnect', function() {
+    game.removePlayer(player);
+  });
 });
