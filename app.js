@@ -31,7 +31,7 @@ httpServer = http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
 });
 
-io = require('socket.io').listen(httpServer);
+io = require('socket.io').listen(httpServer, { log: false });
 
 var game = new Game(io);
 

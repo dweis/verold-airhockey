@@ -2,6 +2,11 @@
   "name": "verold-airhockey",
   "version": "0.0.1",
   "private": true,
+  "subdomain": "airhockey",
+  "engines": {
+    "node": "0.8.17",
+    "npm": "1.2.0"
+  },
   "scripts": {
     "start": "node app"
   },

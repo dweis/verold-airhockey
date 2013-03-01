@@ -84,7 +84,7 @@ MyApp.prototype.initScene = function(scene) {
   this.veroldApp.setActiveCamera( this.camera );
 
   var that = this;
-  this.socket = io.connect('http://192.168.0.12');
+  this.socket = io.connect(/*'http://192.168.0.12'*/);
   this.socket.on('update', function() { that.socketUpdate.apply(that, arguments); });
   this.socket.on('goal', function() { alert('goal'); });
   this.socket.on('active', function(data) {
