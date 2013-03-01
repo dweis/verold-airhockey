@@ -50,6 +50,8 @@ MyApp.prototype.lookAtTable = function() {
 }
 
 MyApp.prototype.initScene = function(scene) {
+  var that = this;
+
   // hide progress indicator
   this.veroldApp.hideLoadingProgress();
 
@@ -83,8 +85,8 @@ MyApp.prototype.initScene = function(scene) {
   //Tell the engine to use this camera when rendering the scene.
   this.veroldApp.setActiveCamera( this.camera );
 
-  var that = this;
-  this.socket = io.connect(/*'http://192.168.0.12'*/);
+  this.socket = io.connect();
+
   this.socket.on('update', function() { that.socketUpdate.apply(that, arguments); });
   this.socket.on('goal', function() { alert('goal'); });
   this.socket.on('active', function(data) {
@@ -156,8 +158,8 @@ MyApp.prototype.onMouseMove = function(event) {
     , y = event.clientY
     , minX = this.width / 3
     , maxX = this.width - (this.width / 3)
-    , minY = this.height / 2
-    , maxY = this.height - 100
+    , minY = (this.height / 4)
+    , maxY = this.height - (this.height / 4)
     , rangeX = maxX - minX
     , rangeY = maxY - minY
     , update
