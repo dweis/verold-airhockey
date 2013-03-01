@@ -28,7 +28,7 @@ var Game = function(io) {
   this.spectators = [];
 
   // Constants
-  this.fps = 60;
+  this.fps = 35;
   this.friction = 0.2;
   this.density = 0.8;
   this.restitution = 0.7;
