@@ -28,16 +28,15 @@ var Game = function(io) {
   this.spectators = [];
 
   // Constants
-  this.fps = 35;
-  this.friction = 0.2;
-  this.density = 0.8;
-  this.restitution = 0.7;
+  this.fps = 40;
+  this.friction = 0.05;
+  this.density = 0.5;
+  this.restitution = 0.9;
   this.width = 1.25;
   this.height = 2.50;
   this.thickness = 0.01;
-  //this.malletDiameter = 0.095;
-  this.malletDiameter = 0.15;
-  this.puckDiameter = 0.073125;
+  this.malletDiameter = 0.095 * 2;
+  this.puckDiameter = 0.048 * 2;
 }
 
 Game.prototype.init = function() {
@@ -160,10 +159,10 @@ Game.prototype.initPhysics = function() {
   // bottom net
   this.createNet(this.width/3 + this.width/6, this.height, this.width/6, this.thickness/2);
 
-  this.puckBody = this.createPuck(this.width/2, this.height/2, 0.073125/2);
+  this.puckBody = this.createPuck(this.width/2, this.height/2, this.puckDiameter/2);
 
-  this.p1Body = this.createMallet(this.width/2, this.height/8, 0.095/2);
-  this.p2Body = this.createMallet(this.width/2, this.height - this.height/8, 0.095/2);
+  this.p1Body = this.createMallet(this.width/2, this.height/8, this.malletDiameter/2);
+  this.p2Body = this.createMallet(this.width/2, this.height - this.height/8, this.malletDiameter/2);
 }
 
 Game.prototype.initContactListener = function() {

@@ -28,13 +28,13 @@ MyApp.prototype.setSpectatorView = function() {
 }
 
 MyApp.prototype.setPlayer1View = function() {
-  this.camera.position.set( 0, 1.6, -1.3 );
+  this.camera.position.set( 0, 1.6, -1.15 );
   this.lookAtTable();
   this.mode = 'p1';
 }
 
 MyApp.prototype.setPlayer2View = function() {
-  this.camera.position.set( 0, 1.6, 1.3 );
+  this.camera.position.set( 0, 1.6, 1.15 );
   this.lookAtTable();
   this.mode = 'p2';
 }
@@ -101,8 +101,8 @@ MyApp.prototype.initScene = function(scene) {
 MyApp.prototype.socketUpdate = function(updateObj) {
   var that = this;
   var translate = function(obj, position, angle) {
-    obj.threeData.position.x = (position.x - (that.tableWidth * 0.5)) * 0.78;
-    obj.threeData.position.z = (position.y - (that.tableHeight * 0.5)) * 0.78;
+    obj.threeData.position.x = (position.x - (that.tableWidth * 0.5)) * 0.7;
+    obj.threeData.position.z = (position.y - (that.tableHeight * 0.5)) * 0.7;
   }
 
   if (this.table) {
