@@ -1,57 +1,90 @@
 MyApp = function( veroldApp ) {
+  this.puckEntityId = '513014602fdccc0200000565';
+  this.p1PaddleEntityId = '513014612fdccc0200000567';
+  this.p2PaddleEntityId = '51301584427fe90200000751';
+  this.tableEntityId = '5130146e21d650020000011b';
 
   this.veroldApp = veroldApp;
-  this.mainScene;
-  this.camera;
+  this.mainScene = undefined;
+  this.camera = undefined;
+  this.p1Paddle = undefined;
+  this.p2Paddle = undefined;
+  this.puck = undefined;
+  this.table = undefined;
 
   this.socket = io.connect('http://localhost');
+
+  this.width = window.innerWidth;
+  this.height = window.innerHeight;
+
+  this.tableWidth = 1.25;
+  this.tableHeight = 2.5;
 }
 
-MyApp.prototype.startup = function( ) {
+MyApp.prototype.initScene = function(scene) {
+  // hide progress indicator
+  this.veroldApp.hideLoadingProgress();
 
+  this.inputHandler = this.veroldApp.getInputHandler();
+  this.renderer = this.veroldApp.getRenderer();
+  this.picker = this.veroldApp.getPicker();
+
+  //Bind to input events to control the camera
+  this.veroldApp.on("keyDown", this.onKeyPress, this);
+  this.veroldApp.on("mouseUp", this.onMouseUp, this);
+  this.veroldApp.on("mouseMove", this.onMouseMove, this);
+  this.veroldApp.on("update", this.update, this );
+
+  //Store a pointer to the scene
+  this.mainScene = scene;
+
+  var models = this.mainScene.getAllObjects( { "filter" :{ "model" : true }});
+
+  this.p1Paddle = models[this.p1PaddleEntityId];
+  this.p2Paddle = models[this.p2PaddleEntityId];
+  this.table = models[this.tableEntityId];
+  this.puck = models[this.puckEntityId];
+
+  console.log(this.p1Paddle, this.p2Paddle);
+
+  //Create the camera
+  this.camera = new THREE.PerspectiveCamera( 70, this.width / this.height, 0.1, 10000 );
+  this.camera.up.set( 0, 1, 0 );
+  this.camera.position.set( 0, 1.6, -1.3 );
+
+  var lookAt = new THREE.Vector3();
+  lookAt.add( this.table.threeData.center );
+  lookAt.multiply( this.table.threeData.scale );
+  lookAt.applyQuaternion( this.table.threeData.quaternion );
+  lookAt.add( this.table.threeData.position );
+  var model = models[ _.keys( models )[2] ].threeData;
+
+  this.camera.lookAt( lookAt );
+
+  //Tell the engine to use this camera when rendering the scene.
+  this.veroldApp.setActiveCamera( this.camera );
+}
+
+MyApp.prototype.socketUpdate = function(updateObj) {
+  var that = this;
+  var translate = function(obj, position, angle) {
+    obj.threeData.position.x = (position.x - (that.tableWidth * 0.5)) * 0.8;
+    obj.threeData.position.z = (position.y - (that.tableHeight * 0.5)) * 0.8;
+  }
+
+  if (this.table) {
+    translate(this.puck, updateObj[0].p, updateObj[0].a);
+    translate(this.p1Paddle, updateObj[1].p, updateObj[0].a);
+    translate(this.p2Paddle, updateObj[2].p, updateObj[0].a);
+  }
+}
+
+MyApp.prototype.startup = function() {
   var that = this;
 
 	this.veroldApp.loadScene( null, {
-
     success_hierarchy: function( scene ) {
-      that.socket.on('update', function(updateObj) {
-        console.log(updateObj);
-      });
-
-      // hide progress indicator
-      that.veroldApp.hideLoadingProgress();
-
-      that.inputHandler = that.veroldApp.getInputHandler();
-      that.renderer = that.veroldApp.getRenderer();
-      that.picker = that.veroldApp.getPicker();
-
-      //Bind to input events to control the camera
-      that.veroldApp.on("keyDown", that.onKeyPress, that);
-      that.veroldApp.on("mouseUp", that.onMouseUp, that);
-      that.veroldApp.on("update", that.update, that );
-
-      //Store a pointer to the scene
-      that.mainScene = scene;
-
-      var models = that.mainScene.getAllObjects( { "filter" :{ "model" : true }});
-      var model = models[ _.keys( models )[0] ].threeData;
-
-      //Create the camera
-      that.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 10000 );
-      that.camera.up.set( 0, 1, 0 );
-      that.camera.position.set( 0, 0.5, 1 );
-
-      var lookAt = new THREE.Vector3();
-      lookAt.add( model.center );
-      lookAt.multiply( model.scale );
-      lookAt.applyQuaternion( model.quaternion );
-      lookAt.add( model.position );
-
-      that.camera.lookAt( lookAt );
-
-      //Tell the engine to use this camera when rendering the scene.
-      that.veroldApp.setActiveCamera( that.camera );
-
+      that.initScene(scene);
     },
 
     progress: function(sceneObj) {
@@ -60,27 +93,20 @@ MyApp.prototype.startup = function( ) {
     }
   });
 
+  this.socket.on('update', function() { that.socketUpdate.apply(that, arguments); });
 }
 
 MyApp.prototype.shutdown = function() {
-
   this.veroldApp.off("keyDown", this.onKeyPress, this);
   this.veroldApp.off("mouseUp", this.onMouseUp, this);
-
+  this.veroldApp.off("mouseMove", this.onMouseMove, this);
   this.veroldApp.off("update", this.update, this );
 }
 
-
-
 MyApp.prototype.update = function( delta ) {
-
 }
 
-
 MyApp.prototype.onMouseUp = function( event ) {
-
-
-
   if ( event.button == this.inputHandler.mouseButtons[ "left" ] &&
     !this.inputHandler.mouseDragStatePrevious[ event.button ] ) {
 
@@ -96,8 +122,26 @@ MyApp.prototype.onMouseUp = function( event ) {
   }
 }
 
-MyApp.prototype.onKeyPress = function( event ) {
+MyApp.prototype.onMouseMove = function(event) {
+  var x = event.clientX, y = event.clientY;
 
+  var minX = this.width / 3
+    , maxX = this.width - (this.width / 3)
+    , minY = this.height / 2
+    , maxY = this.height
+    , rangeX = maxX - minX
+    , rangeY = maxY - minY;
+
+  if (y >= minY && y <= maxY && x >= minX && x <= maxX) {
+    var update = { x: ((x - minX) / rangeX)
+                 , y: ((y - minY) / rangeY) };
+
+    console.log(update);
+    this.socket.emit('position', update);
+  }
+}
+
+MyApp.prototype.onKeyPress = function( event ) {
 	var keyCodes = this.inputHandler.keyCodes;
   if ( event.keyCode === keyCodes['B'] ) {
     var that = this;
@@ -109,7 +153,5 @@ MyApp.prototype.onKeyPress = function( event ) {
         obj.visible = that.boundingBoxesOn;
       }
     });
-
   }
-
 }

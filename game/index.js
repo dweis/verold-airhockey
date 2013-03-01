@@ -21,9 +21,12 @@ var Game = function(io) {
   this.p1 = undefined;
   this.p2 = undefined;
   this.p1Body = undefined;
+  this.p1MouseJoint = undefined;
   this.p2Body = undefined;
+  this.p2MouseJoint = undefined;
 
   // Constants
+  this.fps = 60;
   this.friction = 0.2;
   this.density = 0.8;
   this.restitution = 0.7;
@@ -39,10 +42,33 @@ Game.prototype.init = function() {
 
   this.initPhysics();
   this.initContactListener();
+  this.initMouseJoints();
 
   setInterval(function() {
     that.update();
-  }, 1000 / 60);
+  }, 1000 / this.fps);
+}
+
+Game.prototype.setP1 = function(player) {
+  this.p1 = player;
+
+  this.p1.socket.on('position', this.updatePositionP1());
+}
+
+Game.prototype.setP2 = function(player) {
+  this.p2 = player;
+}
+
+Game.prototype.updatePositionP1 = function() {
+  var that = this;
+  return function() {
+    that._updatePositionP1.apply(that, arguments);
+  }
+}
+
+Game.prototype._updatePositionP1 = function(updateObj) {
+  //this.p1Body.SetPosition({ x: this.width - (updateObj.x * this.width), y: (this.height/2) -((updateObj.y * this.height) * 0.5) });
+  this.p1MouseJoint.SetTarget({ x: this.width - (updateObj.x * this.width), y: (this.height/2) -((updateObj.y * this.height) * 0.5) });
 }
 
 Game.prototype.update = function() {
@@ -52,10 +78,9 @@ Game.prototype.update = function() {
     { p: this.p2Body.GetPosition(), a: this.p2Body.GetAngle() }
   ];
 
-  console.log(JSON.stringify(updateObj));
   this.io.sockets.emit('update', updateObj);
 
-  this.world.Step( 1 / 60   //frame-rate
+  this.world.Step( 1 / this.fps   //frame-rate
                  , 10       //velocity iterations
                  , 10       //position iterations
   );
@@ -103,11 +128,11 @@ Game.prototype.initContactListener = function() {
 
     if (a && a == 'puck') {
       if (b && b == 'net') {
-        alert('GOAL!');
+        console.log('GOAL!');
       }
     } else if (b && b == 'puck') {
       if (a && a == 'net') {
-        alert('GOAL!');
+        console.log('GOAL!');
       }
     }
   }
@@ -120,6 +145,28 @@ Game.prototype.initContactListener = function() {
   listener.PreSolve = function(contact, oldManifold) { }
 
   this.world.SetContactListener(listener);
+}
+
+Game.prototype.initMouseJoints = function() {
+  var md = new b2MouseJointDef();
+
+  // p1
+  md.bodyA = this.world.GetGroundBody();
+  md.bodyB = this.p1Body;
+  md.target.Set(this.p1Body.GetPosition().x, this.p1Body.GetPosition().y);
+  md.collideConnected = true;
+  md.maxForce = 300.0 * this.p1Body.GetMass();
+  this.p1MouseJoint = this.world.CreateJoint(md);
+  this.p1Body.SetAwake(true);
+
+  // p2
+  md.bodyA = this.world.GetGroundBody();
+  md.bodyB = this.p2Body;
+  md.target.Set(this.p2Body.GetPosition().x, this.p2Body.GetPosition().y);
+  md.collideConnected = true;
+  md.maxForce = 300.0 * this.p2Body.GetMass();
+  this.p2MouseJoint = this.world.CreateJoint(md);
+  this.p2Body.SetAwake(true);
 }
 
 Game.prototype.createWall = function(x, y, w, h) {
