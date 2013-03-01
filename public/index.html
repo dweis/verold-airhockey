@@ -1,13 +1,51 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Air Hockey</title>
-    <!--
-    <script type="text/javascript" src="./Box2D.js"></script>
-    <script type="text/javascript" src="./main.js"></script>
-    -->
-  </head>
-  <body onload="init();">
-    <canvas id="canvas" width="300" height="600" style="background-color:#333333;" ></canvas>
-  </body>
+<head>
+  <title>Verold Air Hockey</title>
+  <link rel="stylesheet" href="stylesheets/reset.css">
+  <link rel="stylesheet" href="stylesheets/style.css">
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="text/javascript" src="http://assets.verold.com/verold_api/verold_api_v1.js"></script>
+  <script type="text/javascript" src="javascripts/underscore.js"></script>
+  <script type="text/javascript" src="javascripts/VeroldApp.js"></script>
+  <script type="text/javascript" src="javascripts/MyApp.js"></script>
+</head>
+<body>
+
+  <div id="loading-progress-container">
+    <p>Loading...</p>
+    <div class="loading-progress">
+      <div>&nbsp;</div>
+    </div>
+  </div>
+
+  <div style="display:none;" id="webGLunsupported">
+    <p>This demo requires support for webGL.<br />
+    Click <a href="http://verold.com/blog/2013/1/2/enabling-webgl-in-your-browser" target="_blank">here</a> to learn more.</p>
+  </div>
+
+  <script>
+
+    var veroldApp = new VeroldApp();
+    console.info(veroldApp);
+    var myApp = new MyApp( veroldApp );
+
+    VAPI.onReady( function() {
+      
+      veroldApp.initialize( {
+        container : null,
+        projectId : "5130099e21d65002000000f6",
+        enablePostProcess: false,
+        enablePicking: true,
+        handleInput: true,
+        clearColor: 0xff0000,
+        success: function() {
+          myApp.startup();
+        }
+      });
+    });
+
+  </script>
+  
+</body>
 </html>

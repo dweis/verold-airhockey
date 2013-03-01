@@ -53,7 +53,7 @@ Game.prototype.update = function() {
   ];
 
   console.log(JSON.stringify(updateObj));
-  this.io.sockets.emit(updateObj);
+  this.io.sockets.emit('update', updateObj);
 
   this.world.Step( 1 / 60   //frame-rate
                  , 10       //velocity iterations
