@@ -25,6 +25,8 @@ var Game = function(io) {
   this.p2Body = undefined;
   this.p2MouseJoint = undefined;
 
+  this.spectators = [];
+
   // Constants
   this.fps = 60;
   this.friction = 0.2;
@@ -49,14 +51,46 @@ Game.prototype.init = function() {
   }, 1000 / this.fps);
 }
 
+Game.prototype.addPlayer = function(player) {
+  if (!this.p1) {
+    this.setP1(player);
+  } else if (!this.p2) {
+    this.setP2(player);
+  } else {
+    this.spectators.push(player);
+  }
+}
+
+Game.prototype.removePlayer = function(player) {
+  if (this.p1.socket.id == player.socket.id) {
+    this.p1 = undefined;
+
+    if (this.spectators.length) {
+      this.setP1(this.spectators.pop());
+    }
+  } else if (this.p2.socket.id == player.socket.id) {
+    this.p2 = undefined;
+
+    if (this.spectators.length) {
+      this.setP2(this.spectators.pop());
+    }
+  }
+}
+
 Game.prototype.setP1 = function(player) {
   this.p1 = player;
 
+  // fix me, will cause memory leaks?
   this.p1.socket.on('position', this.updatePositionP1());
+  this.p1.socket.emit('active', { player: 'p1' });
 }
 
 Game.prototype.setP2 = function(player) {
   this.p2 = player;
+
+  // fix me, will cause memory leaks?
+  this.p2.socket.on('position', this.updatePositionP2());
+  this.p2.socket.emit('active', { player: 'p2' });
 }
 
 Game.prototype.updatePositionP1 = function() {
@@ -66,9 +100,21 @@ Game.prototype.updatePositionP1 = function() {
   }
 }
 
+Game.prototype.updatePositionP2 = function() {
+  var that = this;
+  return function() {
+    that._updatePositionP2.apply(that, arguments);
+  }
+}
+
 Game.prototype._updatePositionP1 = function(updateObj) {
   //this.p1Body.SetPosition({ x: this.width - (updateObj.x * this.width), y: (this.height/2) -((updateObj.y * this.height) * 0.5) });
   this.p1MouseJoint.SetTarget({ x: this.width - (updateObj.x * this.width), y: (this.height/2) -((updateObj.y * this.height) * 0.5) });
+}
+
+Game.prototype._updatePositionP2 = function(updateObj) {
+  //this.p1Body.SetPosition({ x: this.width - (updateObj.x * this.width), y: (this.height/2) -((updateObj.y * this.height) * 0.5) });
+  this.p2MouseJoint.SetTarget({ x: (updateObj.x * this.width), y: (this.height/2) + ((updateObj.y * this.height) * 0.5) });
 }
 
 Game.prototype.update = function() {
@@ -128,11 +174,11 @@ Game.prototype.initContactListener = function() {
 
     if (a && a == 'puck') {
       if (b && b == 'net') {
-        console.log('GOAL!');
+        this.io.emit('goal');
       }
     } else if (b && b == 'puck') {
       if (a && a == 'net') {
-        console.log('GOAL!');
+        this.io.emit('goal');
       }
     }
   }

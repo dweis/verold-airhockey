@@ -40,5 +40,5 @@ game.init();
 io.sockets.on('connection', function (socket) {
   var player = { name: 'Derrick', socket: socket };
 
-  game.setP1(player);
+  game.addPlayer(player);
 });

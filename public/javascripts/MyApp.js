@@ -21,6 +21,31 @@ MyApp = function( veroldApp ) {
   this.tableHeight = 2.5;
 }
 
+MyApp.prototype.setSpectatorView = function() {
+  this.camera.position.set( -1.0, 1.8, 0 );
+  this.lookAtTable();
+}
+
+MyApp.prototype.setPlayer1View = function() {
+  this.camera.position.set( 0, 1.6, -1.3 );
+  this.lookAtTable();
+}
+
+MyApp.prototype.setPlayer2View = function() {
+  this.camera.position.set( 0, 1.6, 1.3 );
+  this.lookAtTable();
+}
+
+MyApp.prototype.lookAtTable = function() {
+  var lookAt = new THREE.Vector3();
+  lookAt.add( this.table.threeData.center );
+  lookAt.multiply( this.table.threeData.scale );
+  lookAt.applyQuaternion( this.table.threeData.quaternion );
+  lookAt.add( this.table.threeData.position );
+
+  this.camera.lookAt( lookAt );
+}
+
 MyApp.prototype.initScene = function(scene) {
   // hide progress indicator
   this.veroldApp.hideLoadingProgress();
@@ -50,16 +75,7 @@ MyApp.prototype.initScene = function(scene) {
   //Create the camera
   this.camera = new THREE.PerspectiveCamera( 70, this.width / this.height, 0.1, 10000 );
   this.camera.up.set( 0, 1, 0 );
-  this.camera.position.set( 0, 1.6, -1.3 );
-
-  var lookAt = new THREE.Vector3();
-  lookAt.add( this.table.threeData.center );
-  lookAt.multiply( this.table.threeData.scale );
-  lookAt.applyQuaternion( this.table.threeData.quaternion );
-  lookAt.add( this.table.threeData.position );
-  var model = models[ _.keys( models )[2] ].threeData;
-
-  this.camera.lookAt( lookAt );
+  this.setSpectatorView();
 
   //Tell the engine to use this camera when rendering the scene.
   this.veroldApp.setActiveCamera( this.camera );
@@ -94,6 +110,15 @@ MyApp.prototype.startup = function() {
   });
 
   this.socket.on('update', function() { that.socketUpdate.apply(that, arguments); });
+  this.socket.on('goal', function() { alert('goal'); });
+  this.socket.on('active', function(data) {
+  console.log('DATA', data);
+    if (data.player == 'p1') {
+      that.setPlayer1View();
+    } else if (data.player == 'p2') {
+      that.setPlayer2View();
+    }
+  });
 }
 
 MyApp.prototype.shutdown = function() {
