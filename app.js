@@ -6,6 +6,7 @@
 var express = require('express')
   , http = require('http')
   , path = require('path')
+  , Game = require('./game')
   , httpServer, app, io;
 
 app = express();
@@ -31,6 +32,10 @@ httpServer = http.createServer(app).listen(app.get('port'), function(){
 });
 
 io = require('socket.io').listen(httpServer);
+
+var game = new Game(io);
+
+game.init();
 
 io.sockets.on('connection', function (socket) {
   socket.emit('news', { hello: 'world' });
