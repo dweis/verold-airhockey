@@ -75,8 +75,6 @@ MyApp.prototype.initScene = function(scene) {
   this.table = models[this.tableEntityId];
   this.puck = models[this.puckEntityId];
 
-  console.log(this.p1Paddle, this.p2Paddle);
-
   //Create the camera
   this.camera = new THREE.PerspectiveCamera( 70, this.width / this.height, 0.1, 10000 );
   this.camera.up.set( 0, 1, 0 );
@@ -100,15 +98,15 @@ MyApp.prototype.initScene = function(scene) {
 
 MyApp.prototype.socketUpdate = function(updateObj) {
   var that = this;
-  var translate = function(obj, position, angle) {
-    obj.threeData.position.x = (position.x - (that.tableWidth * 0.5)) * 0.7;
-    obj.threeData.position.z = (position.y - (that.tableHeight * 0.5)) * 0.7;
+  var translate = function(obj, x, y, angle) {
+    obj.threeData.position.x = (x - (that.tableWidth * 0.5)) * 0.71;
+    obj.threeData.position.z = (y - (that.tableHeight * 0.5)) * 0.71;
   }
 
   if (this.table) {
-    translate(this.puck, updateObj[0].p, updateObj[0].a);
-    translate(this.p1Paddle, updateObj[1].p, updateObj[0].a);
-    translate(this.p2Paddle, updateObj[2].p, updateObj[0].a);
+    translate(this.puck, updateObj[0], updateObj[1]);
+    translate(this.p1Paddle, updateObj[2], updateObj[3]);
+    translate(this.p2Paddle, updateObj[4], updateObj[5]);
   }
 }
 
@@ -154,23 +152,30 @@ MyApp.prototype.onMouseUp = function( event ) {
 }
 
 MyApp.prototype.onMouseMove = function(event) {
-  var x = event.clientX
-    , y = event.clientY
-    , minX = this.width / 3
-    , maxX = this.width - (this.width / 3)
-    , minY = (this.height / 4)
-    , maxY = this.height - (this.height / 4)
-    , rangeX = maxX - minX
-    , rangeY = maxY - minY
-    , update
+  if (this.mode == 'p1' || this.mode == 'p2') {
+    var minX = this.width / 3
+      , maxX = this.width - (this.width / 3)
+      , minY = (this.height / 4)
+      , maxY = this.height - (this.height / 4)
+      , rangeX = maxX - minX
+      , rangeY = maxY - minY
+      , x = event.clientX
+      , y = event.clientY
+      , targetX
+      , targetY
+      , update;
 
-  if (y >= minY && y <= maxY && x >= minX && x <= maxX) {
-    update = { x: ((x - minX) / rangeX)
-             , y: ((y - minY) / rangeY) };
+    if (x > maxX) x = maxX;
+    if (x < minX) x = minX;
+    if (y > maxY) y = maxY;
+    if (y < minY) y = minY;
 
-    if (this.mode == 'p1' || this.mode == 'p2') {
-      this.socket.emit('position', update);
-    }
+    targetX = ((x - minX) / rangeX);
+    targetY = ((y - minY) / rangeY);
+
+    update = { x: targetX, y: targetY };
+
+    this.socket.emit('position', update);
   }
 }
 

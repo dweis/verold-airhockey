@@ -25,10 +25,12 @@ var Game = function(io) {
   this.p2Body = undefined;
   this.p2MouseJoint = undefined;
 
+  this.playing = false;
+
   this.spectators = [];
 
   // Constants
-  this.fps = 40;
+  this.fps = 60;
   this.friction = 0.05;
   this.density = 0.5;
   this.restitution = 0.9;
@@ -52,6 +54,7 @@ Game.prototype.init = function() {
 }
 
 Game.prototype.addPlayer = function(player) {
+  this.playing = true;
   if (!this.p1) {
     this.setP1(player);
   } else if (!this.p2) {
@@ -118,51 +121,57 @@ Game.prototype._updatePositionP2 = function(updateObj) {
 }
 
 Game.prototype.update = function() {
-  var updateObj = [
-    { p: this.puckBody.GetPosition(), a: this.puckBody.GetAngle() },
-    { p: this.p1Body.GetPosition(), a: this.p1Body.GetAngle() },
-    { p: this.p2Body.GetPosition(), a: this.p2Body.GetAngle() }
-  ];
+  var p1 = this.puckBody.GetPosition()
+    , p2 = this.p1Body.GetPosition()
+    , p3 = this.p2Body.GetPosition()
+    , updateObj = [ p1.x, p1.y, p2.x, p2.y, p3.x, p3.y ];
 
   this.io.sockets.emit('update', updateObj);
 
-  this.world.Step( 1 / this.fps   //frame-rate
-                 , 10       //velocity iterations
-                 , 10       //position iterations
-  );
+  if (this.playing && !Object.keys(this.io.connected).length) {
+    this.playing = false;
+    this.reset();
+  }
 
-  this.world.ClearForces();
+  if (this.playing) {
+    this.world.Step( 1 / this.fps   //frame-rate
+                   , 20       //velocity iterations
+                   , 20       //position iterations
+    );
+    this.world.ClearForces();
+  }
 }
 
 Game.prototype.initPhysics = function() {
   this.world = new b2World(new b2Vec2(0, 0), true);
 
-  //left
-  this.createWall(0, this.height/2, this.thickness, this.height/2);
+  this.createWall(0, 0, 0, this.height);
+  this.createWall(this.width, 0, this.width, this.height);
 
-  //right
-  this.createWall(this.width, this.height/2, this.thickness, this.height/2);
+  this.createWall(0, 0, this.width/6, 0);
+  this.createWall(this.width/12, 0, 0, this.height / 24);
+  this.createWall(this.width - this.width/6, 0, this.width, 0); 
+  this.createWall(this.width - this.width/12, 0, this.width, this.height / 24);
 
-  // top left
-  this.createWall(this.width/6, 0, this.width/6, this.thickness);
-  // top right
-  this.createWall(this.width - this.width/6, 0, this.width/6, this.thickness);
+  this.createWall(0, this.height, this.width/6, this.height);
+  this.createWall(this.width/12, this.height, 0, this.height - this.height / 24);
+  this.createWall(this.width - this.width/6, this.height, this.width, this.height);
+  this.createWall(this.width - this.width/12, this.height, this.width, this.height - this.height / 24);
 
-  // bottom left
-  this.createWall(this.width/6, this.height, this.width/6, this.thickness);
-  // bottom right
-  this.createWall(this.width - this.width/6, this.height, this.width/6, this.thickness);
-
-  // top net
   this.createNet(this.width/3 + this.width/6, 0, this.width/6, this.thickness/2);
 
-  // bottom net
   this.createNet(this.width/3 + this.width/6, this.height, this.width/6, this.thickness/2);
 
   this.puckBody = this.createPuck(this.width/2, this.height/2, this.puckDiameter/2);
 
   this.p1Body = this.createMallet(this.width/2, this.height/8, this.malletDiameter/2);
   this.p2Body = this.createMallet(this.width/2, this.height - this.height/8, this.malletDiameter/2);
+}
+
+Game.prototype.reset = function() {
+  this.p1Body.SetPosition(this.width/2, this.height/8);
+  this.p2Body.SetPosition(this.width/2, this.height - this.height/8);
+  this.puckBody.SetPosition(this.width/2, this.height/2);
 }
 
 Game.prototype.initContactListener = function() {
@@ -201,7 +210,9 @@ Game.prototype.initMouseJoints = function() {
   md.bodyB = this.p1Body;
   md.target.Set(this.p1Body.GetPosition().x, this.p1Body.GetPosition().y);
   md.collideConnected = true;
-  md.maxForce = 300.0 * this.p1Body.GetMass();
+  md.maxForce = 600.0 * this.p1Body.GetMass();
+  md.frequencyHz = 60;
+  md.dampingRatio = 1;
   this.p1MouseJoint = this.world.CreateJoint(md);
   this.p1Body.SetAwake(true);
 
@@ -210,24 +221,26 @@ Game.prototype.initMouseJoints = function() {
   md.bodyB = this.p2Body;
   md.target.Set(this.p2Body.GetPosition().x, this.p2Body.GetPosition().y);
   md.collideConnected = true;
-  md.maxForce = 300.0 * this.p2Body.GetMass();
+  md.maxForce = 600.0 * this.p2Body.GetMass();
+  md.frequencyHz = 60;
+  md.dampingRatio = 1;
   this.p2MouseJoint = this.world.CreateJoint(md);
   this.p2Body.SetAwake(true);
 }
 
-Game.prototype.createWall = function(x, y, w, h) {
+Game.prototype.createWall = function(x1, y1, x2, y2) {
   var bodyDef, fixDef;
 
   bodyDef = new b2BodyDef;
   bodyDef.type = b2Body.b2_staticBody;
-  bodyDef.position.x = x;
-  bodyDef.position.y = y;
+  bodyDef.position.x = 0;
+  bodyDef.position.y = 0;
 
   fixDef = new b2FixtureDef;
-  fixDef.shape = new b2PolygonShape.AsBox(w, h);
+  fixDef.shape = new b2PolygonShape.AsEdge(new b2Vec2(x1, y1), new b2Vec2(x2, y2));
   fixDef.density = this.density;
   fixDef.friction = this.friction;
-  fixDef.restitution  = this.restitution;
+  fixDef.restitution = this.restitution;
 
   this.world.CreateBody(bodyDef).CreateFixture(fixDef).SetUserData('wall');
 }
