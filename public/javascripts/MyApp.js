@@ -70,6 +70,11 @@ MyApp.prototype.initScene = function(scene) {
 
   var models = this.mainScene.getAllObjects( { "filter" :{ "model" : true }});
 
+  var lights = this.mainScene.getAllObjects( { "filter" : { "light" : true }});
+
+  this.mainScene.removeChildObject(lights[_.keys(lights)[2]]);
+  this.mainScene.removeChildObject(lights[_.keys(lights)[3]]);
+
   this.p1Paddle = models[this.p1PaddleEntityId];
   this.p2Paddle = models[this.p2PaddleEntityId];
   this.table = models[this.tableEntityId];

@@ -148,19 +148,19 @@ Game.prototype.initPhysics = function() {
   this.createWall(0, 0, 0, this.height);
   this.createWall(this.width, 0, this.width, this.height);
 
-  this.createWall(0, 0, this.width/6, 0);
+  this.createWall(0, 0, this.width/3, 0);
   this.createWall(this.width/12, 0, 0, this.height / 24);
-  this.createWall(this.width - this.width/6, 0, this.width, 0); 
+  this.createWall(this.width - this.width/3, 0, this.width, 0); 
   this.createWall(this.width - this.width/12, 0, this.width, this.height / 24);
 
-  this.createWall(0, this.height, this.width/6, this.height);
+  this.createWall(0, this.height, this.width/3, this.height);
   this.createWall(this.width/12, this.height, 0, this.height - this.height / 24);
-  this.createWall(this.width - this.width/6, this.height, this.width, this.height);
+  this.createWall(this.width - this.width/3, this.height, this.width, this.height);
   this.createWall(this.width - this.width/12, this.height, this.width, this.height - this.height / 24);
 
-  this.createNet(this.width/3 + this.width/6, 0, this.width/6, this.thickness/2);
+  this.createNet(this.width/3 + this.width/6, 0, this.width/6, this.thickness*2);
 
-  this.createNet(this.width/3 + this.width/6, this.height, this.width/6, this.thickness/2);
+  this.createNet(this.width/3 + this.width/6, this.height, this.width/6, this.thickness*2);
 
   this.puckBody = this.createPuck(this.width/2, this.height/2, this.puckDiameter/2);
 
