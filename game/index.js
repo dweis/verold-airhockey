@@ -210,9 +210,9 @@ Game.prototype.initMouseJoints = function() {
   md.bodyB = this.p1Body;
   md.target.Set(this.p1Body.GetPosition().x, this.p1Body.GetPosition().y);
   md.collideConnected = true;
-  md.maxForce = 600.0 * this.p1Body.GetMass();
+  md.maxForce = 300.0 * this.p1Body.GetMass();
   md.frequencyHz = 60;
-  md.dampingRatio = 1;
+  md.dampingRatio = 0.1;
   this.p1MouseJoint = this.world.CreateJoint(md);
   this.p1Body.SetAwake(true);
 
@@ -221,9 +221,9 @@ Game.prototype.initMouseJoints = function() {
   md.bodyB = this.p2Body;
   md.target.Set(this.p2Body.GetPosition().x, this.p2Body.GetPosition().y);
   md.collideConnected = true;
-  md.maxForce = 600.0 * this.p2Body.GetMass();
+  md.maxForce = 300.0 * this.p2Body.GetMass();
   md.frequencyHz = 60;
-  md.dampingRatio = 1;
+  md.dampingRatio = 0.1;
   this.p2MouseJoint = this.world.CreateJoint(md);
   this.p2Body.SetAwake(true);
 }

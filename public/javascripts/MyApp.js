@@ -72,7 +72,8 @@ MyApp.prototype.initScene = function(scene) {
 
   var lights = this.mainScene.getAllObjects( { "filter" : { "light" : true }});
 
-  this.mainScene.removeChildObject(lights[_.keys(lights)[2]]);
+  this.mainScene.removeChildObject(lights[_.keys(lights)[1]]);
+  //this.mainScene.removeChildObject(lights[_.keys(lights)[2]]);
   this.mainScene.removeChildObject(lights[_.keys(lights)[3]]);
 
   this.p1Paddle = models[this.p1PaddleEntityId];
@@ -105,7 +106,7 @@ MyApp.prototype.socketUpdate = function(updateObj) {
   var that = this;
   var translate = function(obj, x, y, angle) {
     obj.threeData.position.x = (x - (that.tableWidth * 0.5)) * 0.71;
-    obj.threeData.position.z = (y - (that.tableHeight * 0.5)) * 0.71;
+    obj.threeData.position.z = (y - (that.tableHeight * 0.5)) * 0.72;
   }
 
   if (this.table) {
