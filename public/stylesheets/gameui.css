@@ -2,18 +2,21 @@
   position: absolute;
   left: 0px;
   top: 0px;
+  color: white;
 }
 
 #player2 {
   position: absolute;
   right: 0px;
   top: 0px;
+  color: white;
 }
 
 #spectators {
   position: absolute;
   right: 0px;
   top: 200px;
+  color: white;
 }
 
 #player-setup {
@@ -32,3 +35,5 @@
   color: white;
   display: none;
 }
+
+input {display: block}

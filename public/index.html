@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf8"/>
   <title>Verold Air Hockey</title>
-  <link rel="stylesheet"href="stylesheets/reset.css">
+  <!--<link rel="stylesheet"href="stylesheets/reset.css">-->
   <link rel="stylesheet" href="stylesheets/style.css">
   <link rel="stylesheet" href="stylesheets/gameui.css">
   <script src="/socket.io/socket.io.js"></script>
@@ -39,7 +39,7 @@
         <legend>Player Info</legend>
         <label for="name">Name</label>
         <input type="text" name="name" id="input-name"/>
-        <label for="name">Email</label>
+        <label for="name">Email (optional, for <a href="http://gravatar.com">Gravatar</a> image.)</label>
         <input type="text" name="email" id="input-email"/>
         <input type="submit" value="Join!"/>
       </fieldset>
@@ -77,13 +77,13 @@
   <script type="text/html" id="spectator-template">
     <div class="spectator">
       <img src="{{gravatarUrl}}"/>
-      <h1><{{name}}</h1>
+      <h1>{{name}}</h1>
     </div>
   </script>
   <script type="text/html" id="player-template">
     <div class="player">
       <img src="{{gravatarUrl}}"/>
-      <h1><{{name}}</h1>
+      <h1>{{name}}</h1>
     </div>
   </script>
 </body>
