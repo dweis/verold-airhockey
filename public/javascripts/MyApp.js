@@ -135,7 +135,7 @@ MyApp.prototype.initScene = function(scene) {
 
   this.socket.on('spectatorRemove', function(playerInfo) {
     _.each(that.spectatorsCollection.models,function(model) {
-      if (model.get('name') == playerInfo.name && model.get('gravatarHash') == playerInfo.gravatarHash) {
+      if (model.get('uuid') == playerInfo.uuid) {
         that.spectatorsCollection.remove(model);
       }
     });

@@ -1,5 +1,6 @@
 var Box2D = require('box2dweb-commonjs').Box2D
-  , crypto = require('crypto');
+  , crypto = require('crypto')
+  , uuid = require('node-uuid');
 
 var b2Vec2 = Box2D.Common.Math.b2Vec2
   , b2AABB = Box2D.Collision.b2AABB
@@ -60,11 +61,11 @@ Game.prototype.init = function() {
 
   setInterval(function() {
     that.logStatus();
-  }, 5000);
+  }, 2000);
 }
 
 Game.prototype.logStatus = function() {
-  console.log((this.p1 && this.p1.name) || '<empty>', (this.p2 && this.p2.name) || '<empty>', this.spectators.length);
+  console.log('P1: %s P2: %s #Spectators: %s', (this.p1 && this.p1.name) || '<none>', (this.p2 && this.p2.name) || '<none>', this.spectators.length);
 }
 
 Game.prototype.addPlayer = function(player) {
@@ -75,7 +76,7 @@ Game.prototype.addPlayer = function(player) {
     this.setP2(player);
   } else {
     this.spectators.push(player);
-    this.io.sockets.emit('spectatorAdd', { name: player.name, gravatarHash: player.gravatarHash });
+    this.io.sockets.emit('spectatorAdd', { name: player.name, gravatarHash: player.gravatarHash, uuid: player.uuid });
   }
 }
 
@@ -85,7 +86,7 @@ Game.prototype.removePlayer = function(player) {
 
     if (this.spectators.length) {
       this.setP1(this.spectators.pop());
-      this.io.sockets.emit('spectatorRemove', { name: this.p1.name, gravatarHash: this.p1.gravatarHash });
+      this.io.sockets.emit('spectatorRemove', { name: this.p1.name, gravatarHash: this.p1.gravatarHash, uuid: this.p1.uuid });
     } else {
       this.io.sockets.emit('p1');
     }
@@ -94,7 +95,7 @@ Game.prototype.removePlayer = function(player) {
 
     if (this.spectators.length) {
       this.setP2(this.spectators.pop());
-      this.io.sockets.emit('spectatorRemove', { name: this.p2.name, gravatarHash: this.p2.gravatarHash });
+      this.io.sockets.emit('spectatorRemove', { name: this.p2.name, gravatarHash: this.p2.gravatarHash, uuid: this.p2.uuid });
     } else {
       this.io.sockets.emit('p2');
     }
@@ -102,8 +103,9 @@ Game.prototype.removePlayer = function(player) {
     for (var i in this.spectators) {
       if (this.spectators[i].socket.id == player.socket.id) {
         this.io.sockets.emit('spectatorRemove', {
-          name: this.spectators[i].name, 
-          gravatarHash: this.spectators[i].gravatarHash });
+          name: this.spectators[i].name,
+          gravatarHash: this.spectators[i].gravatarHash,
+          uuid: this.spectators[i].uuid });
         this.spectators.splice(i, 1);
       }
     }
@@ -123,7 +125,7 @@ Game.prototype.setP1 = function(player) {
   this.p1.socket.on('position', this.updatePositionP1());
   this.p1.socket.emit('active', { player: 'p1' });
 
-  this.io.sockets.emit('p1', { name: player.name, gravatarHash: player.gravatarHash });
+  this.io.sockets.emit('p1', { name: player.name, gravatarHash: player.gravatarHash, uuid: player.uuid });
 }
 
 Game.prototype.setP2 = function(player) {
@@ -133,7 +135,7 @@ Game.prototype.setP2 = function(player) {
   this.p2.socket.on('position', this.updatePositionP2());
   this.p2.socket.emit('active', { player: 'p2' });
 
-  this.io.sockets.emit('p2', { name: player.name, gravatarHash: player.gravatarHash });
+  this.io.sockets.emit('p2', { name: player.name, gravatarHash: player.gravatarHash, uuid: player.uuid });
 }
 
 Game.prototype.updatePositionP1 = function() {
@@ -361,18 +363,19 @@ Game.prototype.initSocketIO = function() {
       spectators: []
     };
 
-    if (that.p1) initialUsers.p1 = { name: that.p1.name, gravatarHash: that.p1.gravatarHash };
-    if (that.p2) initialUsers.p2 = { name: that.p2.name, gravatarHash: that.p2.gravatarHash };
+    if (that.p1) initialUsers.p1 = { name: that.p1.name, gravatarHash: that.p1.gravatarHash, uuid: that.p1.uuid };
+    if (that.p2) initialUsers.p2 = { name: that.p2.name, gravatarHash: that.p2.gravatarHash, uuid: that.p2.uuid };
 
     for (var i in that.spectators) {
       initialUsers.spectators.push({ name: that.spectators[i].name
-                                   , gravatarHash: that.spectators[i].gravatarHash });
+                                   , gravatarHash: that.spectators[i].gravatarHash
+                                   , uuid: that.spectators[i].uuid });
     }
 
     socket.emit('initialUsers', initialUsers);
 
 
-    var player = { socket: socket };
+    var player = { socket: socket, uuid: uuid.v4() };
 
     socket.on('playerRegister', function(playerInfo) {
       player.name = playerInfo.name.trim();
@@ -381,7 +384,7 @@ Game.prototype.initSocketIO = function() {
 
       console.log('Player registered: %s', player.name);
 
-      socket.emit('playerRegistered', { name: player.name, gravatarHash: player.gravatarHash });
+      socket.emit('playerRegistered', { name: player.name, gravatarHash: player.gravatarHash, uuid: player.uuid });
 
       that.addPlayer(player);
     });
