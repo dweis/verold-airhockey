@@ -68,8 +68,13 @@ $(function() {
     el: '#player-setup',
 
     initialize: function() {
+      var name = localStorage.name || 'Guest' + Math.floor(Math.random() * 1000)
+        , email = localStorage.email || '';
+
+
       window.AirHockey.socket.on('playerRegistered', $.proxy(this.onRegistered, this));
-      $('#input-name').val('Guest' + Math.floor(Math.random() * 1000));
+      $('#input-name').val(name);
+      $('#input-email').val(email);
       $(this.el).show();
     },
 
@@ -86,6 +91,9 @@ $(function() {
       if (!name.length) {
         return alert('invalid name!');
       }
+
+      localStorage.name = name;
+      localStorage.email = email;
 
       window.AirHockey.socket.emit('playerRegister', { name: name, email: email });
     },
