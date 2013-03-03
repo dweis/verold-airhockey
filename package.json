@@ -1,6 +1,6 @@
 {
   "name": "verold-airhockey",
-  "version": "0.0.1-11",
+  "version": "0.0.1-12",
   "private": true,
   "subdomain": "airhockey",
   "engines": {
