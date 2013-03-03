@@ -198,8 +198,8 @@ Game.prototype.initPhysics = function() {
   this.createWall(this.width - this.width/3, this.height, this.width, this.height);
   this.createWall(this.width - this.width/12, this.height, this.width, this.height - this.height / 24);
 
-  this.createNet(this.width/3 + this.width/6, 0, this.width/6, this.thickness*2, 1);
-  this.createNet(this.width/3 + this.width/6, this.height, this.width/6, this.thickness*2, 2);
+  this.createNet(this.width/3 + this.width/6, -0.05, this.width/6, this.thickness*2, 1);
+  this.createNet(this.width/3 + this.width/6, this.height + 0.05, this.width/6, this.thickness*2, 2);
 
   this.puckBody = this.createPuck(this.width/2, this.height/2, this.puckDiameter/2);
 
