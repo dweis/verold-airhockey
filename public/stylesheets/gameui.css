@@ -1,3 +1,6 @@
+body {
+  font-family: 'Rationale', sans-serif;
+}
 #player1 {
   position: absolute;
   left: 0px;
