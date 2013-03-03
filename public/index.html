@@ -1,14 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="utf8"/>
   <title>Verold Air Hockey</title>
-  <link rel="stylesheet" href="stylesheets/reset.css">
+  <link rel="stylesheet"href="stylesheets/reset.css">
   <link rel="stylesheet" href="stylesheets/style.css">
+  <link rel="stylesheet" href="stylesheets/gameui.css">
   <script src="/socket.io/socket.io.js"></script>
   <script type="text/javascript" src="http://assets.verold.com/verold_api/verold_api_v1.js"></script>
   <script type="text/javascript" src="javascripts/underscore.js"></script>
+  <script type="text/javascript" src="javascripts/backbone.js"></script>
   <script type="text/javascript" src="javascripts/VeroldApp.js"></script>
   <script type="text/javascript" src="javascripts/MyApp.js"></script>
+  <script type="text/javascript" src="javascripts/GameUI.js"></script>
 </head>
 <body>
 
@@ -17,6 +21,29 @@
     <div class="loading-progress">
       <div>&nbsp;</div>
     </div>
+  </div>
+
+  <div id="player1">
+  </div>
+  <div id="player2">
+  </div>
+  <div id="spectators">
+    <ul></ul>
+  </div>
+
+  <div id="player-setup">
+    <h1>Air Hockey</h1>
+
+    <form id="player-setup-form">
+      <fieldset>
+        <legend>Player Info</legend>
+        <label for="name">Name</label>
+        <input type="text" name="name" id="input-name"/>
+        <label for="name">Email</label>
+        <input type="text" name="email" id="input-email"/>
+        <input type="submit" value="Join!"/>
+      </fieldset>
+    </form>
   </div>
 
   <div style="display:none;" id="webGLunsupported">
@@ -31,7 +58,6 @@
     var myApp = new MyApp( veroldApp );
 
     VAPI.onReady( function() {
-      
       veroldApp.initialize( {
         container : null,
         projectId : "5130099e21d65002000000f6",
@@ -45,7 +71,20 @@
       });
     });
 
+    window.AirHockey = myApp;
+
   </script>
-  
+  <script type="text/html" id="spectator-template">
+    <div class="spectator">
+      <img src="{{gravatarUrl}}"/>
+      <h1><{{name}}</h1>
+    </div>
+  </script>
+  <script type="text/html" id="player-template">
+    <div class="player">
+      <img src="{{gravatarUrl}}"/>
+      <h1><{{name}}</h1>
+    </div>
+  </script>
 </body>
 </html>

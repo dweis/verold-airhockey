@@ -100,6 +100,59 @@ MyApp.prototype.initScene = function(scene) {
       that.setPlayer2View();
     }
   });
+
+  this.socket.on('initialUsers', function(initialUsers) {
+    if (initialUsers.p1) {
+      that.p1View.setPlayer(new window.GameUI.Models.PlayerModel(initialUsers.p1));
+    }
+    if (initialUsers.p2) {
+      that.p2View.setPlayer(new window.GameUI.Models.PlayerModel(initialUsers.p2));
+    }
+    _.each(initialUsers.spectators, function(playerInfo) {
+      that.spectatorsCollection.add(new window.GameUI.Models.PlayerModel(playerInfo));
+    });
+  });
+
+  this.socket.on('p1', function(playerInfo) {
+    if (playerInfo) {
+      that.p1View.setPlayer(new window.GameUI.Models.PlayerModel(playerInfo));
+    } else {
+      that.p1View.removePlayer();
+    }
+  });
+
+  this.socket.on('p2', function(playerInfo) {
+    if (playerInfo) {
+      that.p2View.setPlayer(new window.GameUI.Models.PlayerModel(playerInfo));
+    } else {
+      that.p2View.removePlayer();
+    }
+  });
+
+  this.socket.on('spectatorAdd', function(playerInfo) {
+    that.spectatorsCollection.add(new window.GameUI.Models.PlayerModel(playerInfo));
+  });
+
+  this.socket.on('spectatorRemove', function(playerInfo) {
+    _.each(that.spectatorsCollection.models,function(model) {
+      if (model.get('name') == playerInfo.name && model.get('gravatarHash') == playerInfo.gravatarHash) {
+        that.spectatorsCollection.remove(model);
+      }
+    });
+  });
+}
+
+MyApp.prototype.initUI = function() {
+  var that = this;
+
+  this.spectatorsCollection = new window.GameUI.Collections.SpectatorsCollection();
+  this.p1View = new window.GameUI.Views.PlayerView({ el: '#player1' });
+  this.p2View = new window.GameUI.Views.PlayerView({ el: '#player2' });
+  this.specatorsView = new window.GameUI.Views.SpectatorsView({ collection: this.spectatorsCollection });
+
+  this.socket.on('connect', function() {
+    that.playerSetupView = new window.GameUI.Views.PlayerSetupView();
+  });
 }
 
 MyApp.prototype.socketUpdate = function(updateObj) {
@@ -122,6 +175,7 @@ MyApp.prototype.startup = function() {
 	this.veroldApp.loadScene( null, {
     success_hierarchy: function( scene ) {
       that.initScene(scene);
+      that.initUI();
     },
 
     progress: function(sceneObj) {

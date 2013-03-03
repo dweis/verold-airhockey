@@ -1,4 +1,5 @@
-var Box2D = require('box2dweb-commonjs').Box2D;
+var Box2D = require('box2dweb-commonjs').Box2D
+  , crypto = require('crypto');
 
 var b2Vec2 = Box2D.Common.Math.b2Vec2
   , b2AABB = Box2D.Collision.b2AABB
@@ -13,6 +14,10 @@ var b2Vec2 = Box2D.Common.Math.b2Vec2
   , b2MouseJointDef = Box2D.Dynamics.Joints.b2MouseJointDef
   , b2Listener = Box2D.Dynamics.b2ContactListener
   , b2DebugDraw = Box2D.Dynamics.b2DebugDraw;
+
+function md5(string) {
+  return crypto.createHash('md5').update(string).digest('hex');
+}
 
 var Game = function(io) {
   this.io = io;
@@ -47,10 +52,19 @@ Game.prototype.init = function() {
   this.initPhysics();
   this.initContactListener();
   this.initMouseJoints();
+  this.initSocketIO();
 
   setInterval(function() {
     that.update();
   }, 1000 / this.fps);
+
+  setInterval(function() {
+    that.logStatus();
+  }, 5000);
+}
+
+Game.prototype.logStatus = function() {
+  console.log((this.p1 && this.p1.name) || '<empty>', (this.p2 && this.p2.name) || '<empty>', this.spectators.length);
 }
 
 Game.prototype.addPlayer = function(player) {
@@ -61,23 +75,45 @@ Game.prototype.addPlayer = function(player) {
     this.setP2(player);
   } else {
     this.spectators.push(player);
+    this.io.sockets.emit('spectatorAdd', { name: player.name, gravatarHash: player.gravatarHash });
   }
 }
 
 Game.prototype.removePlayer = function(player) {
-  if (this.p1.socket.id == player.socket.id) {
+  if (this.p1 && this.p1.socket && this.p1.socket.id == player.socket.id) {
     this.p1 = undefined;
 
     if (this.spectators.length) {
       this.setP1(this.spectators.pop());
+      this.io.sockets.emit('spectatorRemove', { name: this.p1.name, gravatarHash: this.p1.gravatarHash });
+    } else {
+      this.io.sockets.emit('p1');
     }
-  } else if (this.p2.socket.id == player.socket.id) {
+  } else if (this.p2 && this.p2.socket && this.p2.socket.id == player.socket.id) {
     this.p2 = undefined;
 
     if (this.spectators.length) {
       this.setP2(this.spectators.pop());
+      this.io.sockets.emit('spectatorRemove', { name: this.p2.name, gravatarHash: this.p2.gravatarHash });
+    } else {
+      this.io.sockets.emit('p2');
+    }
+  } else {
+    for (var i in this.spectators) {
+      if (this.spectators[i].socket.id == player.socket.id) {
+        this.io.sockets.emit('spectatorRemove', {
+          name: this.spectators[i].name, 
+          gravatarHash: this.spectators[i].gravatarHash });
+        this.spectators.splice(i, 1);
+      }
     }
   }
+}
+
+Game.prototype.goal = function(net) {
+  console.log('Goal on net: ' + net);
+  this.io.sockets.emit('goal', net);
+  this.reset();
 }
 
 Game.prototype.setP1 = function(player) {
@@ -86,6 +122,8 @@ Game.prototype.setP1 = function(player) {
   // fix me, will cause memory leaks?
   this.p1.socket.on('position', this.updatePositionP1());
   this.p1.socket.emit('active', { player: 'p1' });
+
+  this.io.sockets.emit('p1', { name: player.name, gravatarHash: player.gravatarHash });
 }
 
 Game.prototype.setP2 = function(player) {
@@ -94,6 +132,8 @@ Game.prototype.setP2 = function(player) {
   // fix me, will cause memory leaks?
   this.p2.socket.on('position', this.updatePositionP2());
   this.p2.socket.emit('active', { player: 'p2' });
+
+  this.io.sockets.emit('p2', { name: player.name, gravatarHash: player.gravatarHash });
 }
 
 Game.prototype.updatePositionP1 = function() {
@@ -111,12 +151,10 @@ Game.prototype.updatePositionP2 = function() {
 }
 
 Game.prototype._updatePositionP1 = function(updateObj) {
-  //this.p1Body.SetPosition({ x: this.width - (updateObj.x * this.width), y: (this.height/2) -((updateObj.y * this.height) * 0.5) });
   this.p1MouseJoint.SetTarget({ x: this.width - (updateObj.x * this.width), y: (this.height/2) -((updateObj.y * this.height) * 0.5) });
 }
 
 Game.prototype._updatePositionP2 = function(updateObj) {
-  //this.p1Body.SetPosition({ x: this.width - (updateObj.x * this.width), y: (this.height/2) -((updateObj.y * this.height) * 0.5) });
   this.p2MouseJoint.SetTarget({ x: (updateObj.x * this.width), y: (this.height/2) + ((updateObj.y * this.height) * 0.5) });
 }
 
@@ -158,9 +196,8 @@ Game.prototype.initPhysics = function() {
   this.createWall(this.width - this.width/3, this.height, this.width, this.height);
   this.createWall(this.width - this.width/12, this.height, this.width, this.height - this.height / 24);
 
-  this.createNet(this.width/3 + this.width/6, 0, this.width/6, this.thickness*2);
-
-  this.createNet(this.width/3 + this.width/6, this.height, this.width/6, this.thickness*2);
+  this.createNet(this.width/3 + this.width/6, 0, this.width/6, this.thickness*2, 1);
+  this.createNet(this.width/3 + this.width/6, this.height, this.width/6, this.thickness*2, 2);
 
   this.puckBody = this.createPuck(this.width/2, this.height/2, this.puckDiameter/2);
 
@@ -169,25 +206,34 @@ Game.prototype.initPhysics = function() {
 }
 
 Game.prototype.reset = function() {
-  this.p1Body.SetPosition(this.width/2, this.height/8);
-  this.p2Body.SetPosition(this.width/2, this.height - this.height/8);
-  this.puckBody.SetPosition(this.width/2, this.height/2);
+  this.p1Body.SetPositionAndAngle({ x: this.width/2, y: this.height/8 }, 0);
+  this.p1Body.SetLinearVelocity(new b2Vec2(0,0));
+  this.p1Body.SetAngularVelocity(0);
+
+  this.p2Body.SetLinearVelocity(new b2Vec2(0,0));
+  this.p2Body.SetAngularVelocity(0);
+  this.p2Body.SetPositionAndAngle({ x: this.width/2, y: this.height - this.height/8 }, 0);
+
+  this.puckBody.SetLinearVelocity(new b2Vec2(0,0));
+  this.puckBody.SetAngularVelocity(0);
+  this.puckBody.SetPositionAndAngle({ x: this.width/2, y: this.height/2 }, 0);
 }
 
 Game.prototype.initContactListener = function() {
-  var listener = new b2Listener;
+  var listener = new b2Listener
+    , that = this;
 
   listener.BeginContact = function(contact) {
     var a = contact.GetFixtureA().GetUserData()
       , b = contact.GetFixtureB().GetUserData();
 
     if (a && a == 'puck') {
-      if (b && b == 'net') {
-        this.io.emit('goal');
+      if (b && b.indexOf('net') == 0) {
+        that.goal(b.substring(3,4));
       }
     } else if (b && b == 'puck') {
-      if (a && a == 'net') {
-        this.io.emit('goal');
+      if (a && a.indexOf('net') == 0) {
+        that.goal(a.substring(3,4));
       }
     }
   }
@@ -245,7 +291,7 @@ Game.prototype.createWall = function(x1, y1, x2, y2) {
   this.world.CreateBody(bodyDef).CreateFixture(fixDef).SetUserData('wall');
 }
 
-Game.prototype.createNet = function(x, y, w, h) {
+Game.prototype.createNet = function(x, y, w, h, n) {
   var bodyDef, fixDef;
 
   bodyDef = new b2BodyDef;
@@ -260,7 +306,7 @@ Game.prototype.createNet = function(x, y, w, h) {
   fixDef.restitution  = this.restitution;
   fixDef.isSensor = true;
 
-  this.world.CreateBody(bodyDef).CreateFixture(fixDef).SetUserData('net');
+  this.world.CreateBody(bodyDef).CreateFixture(fixDef).SetUserData('net' + n);
 }
 
 Game.prototype.createPuck = function(x, y, size) {
@@ -303,6 +349,47 @@ Game.prototype.createMallet = function(x, y, size) {
   body.CreateFixture(fixDef).SetUserData('mallet');
 
   return body;
+}
+
+Game.prototype.initSocketIO = function() {
+  var that = this;
+
+  this.io.sockets.on('connection', function (socket) {
+    var initialUsers = {
+      p1: undefined,
+      p2: undefined,
+      spectators: []
+    };
+
+    if (that.p1) initialUsers.p1 = { name: that.p1.name, gravatarHash: that.p1.gravatarHash };
+    if (that.p2) initialUsers.p2 = { name: that.p2.name, gravatarHash: that.p2.gravatarHash };
+
+    for (var i in that.spectators) {
+      initialUsers.spectators.push({ name: that.spectators[i].name
+                                   , gravatarHash: that.spectators[i].gravatarHash });
+    }
+
+    socket.emit('initialUsers', initialUsers);
+
+
+    var player = { socket: socket };
+
+    socket.on('playerRegister', function(playerInfo) {
+      player.name = playerInfo.name.trim();
+      player.gravatarHash = md5(playerInfo.email.trim() ||
+          ('guest+' + Math.floor(Math.random() * 1000)) + '@airhockey.jit.su');
+
+      console.log('Player registered: %s', player.name);
+
+      socket.emit('playerRegistered', { name: player.name, gravatarHash: player.gravatarHash });
+
+      that.addPlayer(player);
+    });
+
+    socket.on('disconnect', function() {
+      that.removePlayer(player);
+    });
+  });
 }
 
 module.exports = Game;
