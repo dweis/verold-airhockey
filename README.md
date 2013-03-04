@@ -1,7 +1,7 @@
 # Verold Airhockey
 
   HTML5 web-based air hockey game built on [Verold API](http://verold.com),
-  [THREE.js](https://github.com/mrdoob/three.js/), box2dweb(http://code.google.com/p/box2dweb/) and
+  [THREE.js](https://github.com/mrdoob/three.js/), [box2dweb](http://code.google.com/p/box2dweb/) and
   [Socket.IO](http://socket.io).
 
 ## Installation
