@@ -123,7 +123,7 @@ MyApp.prototype.initScene = function(scene) {
     if (playerInfo) {
       that.p1View.model.set(playerInfo);
     } else {
-      that.p1View.model.set({});
+      that.p1View.model.set({ name: '', gravatarHash: '', score: 0 });
     }
   });
 
@@ -131,7 +131,7 @@ MyApp.prototype.initScene = function(scene) {
     if (playerInfo) {
       that.p2View.model.set(playerInfo);
     } else {
-      that.p2View.model.set({});
+      that.p2View.model.set({ name: '', gravatarHash: '', score: 0 });
     }
   });
 
