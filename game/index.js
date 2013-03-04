@@ -186,8 +186,8 @@ Game.prototype.update = function() {
 
   if (this.playing) {
     this.world.Step( 1 / this.fps   //frame-rate
-                   , 10       //velocity iterations
-                   , 10       //position iterations
+                   , 20       //velocity iterations
+                   , 20       //position iterations
     );
     this.world.ClearForces();
   }
