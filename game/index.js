@@ -66,6 +66,7 @@ Game.prototype.init = function() {
 
 Game.prototype.logStatus = function() {
   console.log('P1: %s P2: %s #Spectators: %s', (this.p1 && this.p1.name) || '<none>', (this.p2 && this.p2.name) || '<none>', this.spectators.length);
+  console.log('Puck position: ', this.puckBody.GetPosition());
 }
 
 Game.prototype.addPlayer = function(player) {
@@ -185,14 +186,16 @@ Game.prototype.update = function() {
 
   if (this.playing) {
     this.world.Step( 1 / this.fps   //frame-rate
-                   , 20       //velocity iterations
-                   , 20       //position iterations
+                   , 10       //velocity iterations
+                   , 10       //position iterations
     );
     this.world.ClearForces();
   }
 }
 
 Game.prototype.initPhysics = function() {
+  console.log('Initializing physics...');
+
   this.world = new b2World(new b2Vec2(0, 0), true);
 
   this.createWall(0, 0, 0, this.height);
@@ -218,17 +221,16 @@ Game.prototype.initPhysics = function() {
 }
 
 Game.prototype.reset = function() {
-  this.p1Body.SetPositionAndAngle({ x: this.width/2, y: this.height/8 }, 0);
-  this.p1Body.SetLinearVelocity(new b2Vec2(0,0));
-  this.p1Body.SetAngularVelocity(0);
+  var that = this;
 
-  this.p2Body.SetLinearVelocity(new b2Vec2(0,0));
-  this.p2Body.SetAngularVelocity(0);
-  this.p2Body.SetPositionAndAngle({ x: this.width/2, y: this.height - this.height/8 }, 0);
+  console.log('Resetting puck and p1/p2 bodies...');
 
-  this.puckBody.SetLinearVelocity(new b2Vec2(0,0));
-  this.puckBody.SetAngularVelocity(0);
-  this.puckBody.SetPositionAndAngle({ x: this.width/2, y: this.height/2 }, 0);
+  // If set right away it won't work, have to use setTimeout()
+  setTimeout(function() {
+    that.puckBody.SetLinearVelocity(new b2Vec2(0, 0));
+    that.puckBody.SetAngularVelocity(0);
+    that.puckBody.SetPositionAndAngle(new b2Vec2(that.width/2, that.height/2), 0);
+  }, 100);
 }
 
 Game.prototype.initContactListener = function() {
