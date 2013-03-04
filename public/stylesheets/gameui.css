@@ -20,6 +20,17 @@ body, input {
   right: 0px;
   top: 200px;
   color: white;
+  list-style: none;
+}
+
+#spectators > li {
+  font-size: 10px;
+  background-color: rgba(90,90,90,0.5);
+}
+
+#spectators > li img {
+  width: 32px;
+  height: 32px;
 }
 
 #player-setup {

@@ -50,6 +50,10 @@ $(function() {
   window.GameUI.Views.PlayerView = Backbone.View.extend({
     template: window.GameUI.Templates.playerTemplate,
 
+    setPlayerNumber: function(playerNumber) {
+      this.playerNumber = playerNumber;
+    },
+
     setPlayer: function(playerModel) {
       this.model = playerModel;
       this.render();
@@ -60,7 +64,10 @@ $(function() {
     },
 
     render: function() {
-      $(this.el).html(this.template(this.model.toJSON()));
+      var data = this.model.toJSON();
+      data.playerNumber = this.playerNumber;
+
+      $(this.el).html(this.template(data));
     }
   });
 

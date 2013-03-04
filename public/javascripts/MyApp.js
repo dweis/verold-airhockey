@@ -150,6 +150,9 @@ MyApp.prototype.initUI = function() {
   this.p2View = new window.GameUI.Views.PlayerView({ el: '#player2' });
   this.specatorsView = new window.GameUI.Views.SpectatorsView({ collection: this.spectatorsCollection });
 
+  this.p1View.setPlayerNumber(1);
+  this.p2View.setPlayerNumber(2);
+
   this.socket.on('connect', function() {
     that.playerSetupView = new window.GameUI.Views.PlayerSetupView();
   });
