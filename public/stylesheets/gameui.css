@@ -1,6 +1,25 @@
 body, input {
   font-family: 'Rationale', sans-serif;
 }
+
+.goal {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  width: 120px;
+  height: 80px;
+  text-align: center;
+  margin-left: -60px;
+  margin-top: -50px;
+  color: white;
+  font-size: 72px;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+}
+
+.goal>p {
+  font-size: 32px;
+}
+
 #player1 {
   position: absolute;
   left: 0px;

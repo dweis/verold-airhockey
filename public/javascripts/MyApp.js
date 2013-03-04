@@ -92,7 +92,13 @@ MyApp.prototype.initScene = function(scene) {
   this.socket = io.connect();
 
   this.socket.on('update', function() { that.socketUpdate.apply(that, arguments); });
-  this.socket.on('goal', function() { alert('goal'); });
+  this.socket.on('goal', function(net) { 
+    var goalView = new window.GameUI.Views.GoalView({ model: (net == 1) ? that.p2View.model : that.p1View.model });
+
+    setTimeout(function() {
+      goalView.remove();
+    }, 1000);
+  });
   this.socket.on('active', function(data) {
     if (data.player == 'p1') {
       that.setPlayer1View();
@@ -103,10 +109,10 @@ MyApp.prototype.initScene = function(scene) {
 
   this.socket.on('initialUsers', function(initialUsers) {
     if (initialUsers.p1) {
-      that.p1View.setPlayer(new window.GameUI.Models.PlayerModel(initialUsers.p1));
+      that.p1View.model.set(initialUsers.p1);
     }
     if (initialUsers.p2) {
-      that.p2View.setPlayer(new window.GameUI.Models.PlayerModel(initialUsers.p2));
+      that.p2View.model.set(initialUsers.p2);
     }
     _.each(initialUsers.spectators, function(playerInfo) {
       that.spectatorsCollection.add(new window.GameUI.Models.PlayerModel(playerInfo));
@@ -115,17 +121,17 @@ MyApp.prototype.initScene = function(scene) {
 
   this.socket.on('p1', function(playerInfo) {
     if (playerInfo) {
-      that.p1View.setPlayer(new window.GameUI.Models.PlayerModel(playerInfo));
+      that.p1View.model.set(playerInfo);
     } else {
-      that.p1View.removePlayer();
+      that.p1View.model.set({});
     }
   });
 
   this.socket.on('p2', function(playerInfo) {
     if (playerInfo) {
-      that.p2View.setPlayer(new window.GameUI.Models.PlayerModel(playerInfo));
+      that.p2View.model.set(playerInfo);
     } else {
-      that.p2View.removePlayer();
+      that.p2View.model.set({});
     }
   });
 
@@ -139,6 +145,15 @@ MyApp.prototype.initScene = function(scene) {
         that.spectatorsCollection.remove(model);
       }
     });
+  });
+
+  this.socket.on('score', function(score) {
+    if (score[0] != that.p1View.model.get('score')) {
+      that.p1View.model.set('score', score[0]);
+    }
+    if (score[1] != that.p2View.model.get('score')) {
+      that.p2View.model.set('score', score[1]);
+    }
   });
 }
 

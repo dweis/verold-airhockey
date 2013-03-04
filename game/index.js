@@ -66,6 +66,7 @@ Game.prototype.init = function() {
 
 Game.prototype.logStatus = function() {
   console.log('P1: %s P2: %s #Spectators: %s', (this.p1 && this.p1.name) || '<none>', (this.p2 && this.p2.name) || '<none>', this.spectators.length);
+  console.log('Score P1: %s P2: %s', (this.p1 && this.p1.score) || '<none>', (this.p2 && this.p2.score) || '<none>');
   console.log('Puck position: ', this.puckBody.GetPosition());
 }
 
@@ -120,9 +121,31 @@ Game.prototype.removePlayer = function(player) {
 }
 
 Game.prototype.goal = function(net) {
+  if (net == 1) {
+    if (this.p2) this.p2.score ++;
+  } else if (net == 2) {
+    if (this.p1) this.p1.score ++;
+  }
+
   console.log('Goal on net: ' + net);
   this.io.sockets.emit('goal', net);
   this.reset();
+
+  this.updateScores();
+}
+
+Game.prototype.updateScores = function() {
+  this.io.sockets.emit('score', [ (this.p1 && this.p1.score) || 0, (this.p2 && this.p2.score) || 0 ]);
+}
+
+Game.prototype.resetScores = function() {
+  if (this.p1)
+    this.p1.score = 0;
+
+  if (this.p2)
+    this.p2.score = 0;
+
+  this.updateScores();
 }
 
 Game.prototype.setP1 = function(player) {
@@ -132,7 +155,9 @@ Game.prototype.setP1 = function(player) {
   this.p1.socket.on('position', this.updatePositionP1());
   this.p1.socket.emit('active', { player: 'p1' });
 
-  this.io.sockets.emit('p1', { name: player.name, gravatarHash: player.gravatarHash, uuid: player.uuid });
+  this.resetScores();
+
+  this.io.sockets.emit('p1', { name: player.name, gravatarHash: player.gravatarHash, uuid: player.uuid, score: this.p1.score });
 
   console.log(this.p1.name + ' has become player 1');
 }
@@ -144,7 +169,9 @@ Game.prototype.setP2 = function(player) {
   this.p2.socket.on('position', this.updatePositionP2());
   this.p2.socket.emit('active', { player: 'p2' });
 
-  this.io.sockets.emit('p2', { name: player.name, gravatarHash: player.gravatarHash, uuid: player.uuid });
+  this.resetScores();
+
+  this.io.sockets.emit('p2', { name: player.name, gravatarHash: player.gravatarHash, uuid: player.uuid, score: this.p2.score });
 
   console.log(this.p2.name + ' has become player 2');
 }
@@ -375,8 +402,8 @@ Game.prototype.initSocketIO = function() {
       spectators: []
     };
 
-    if (that.p1) initialUsers.p1 = { name: that.p1.name, gravatarHash: that.p1.gravatarHash, uuid: that.p1.uuid };
-    if (that.p2) initialUsers.p2 = { name: that.p2.name, gravatarHash: that.p2.gravatarHash, uuid: that.p2.uuid };
+    if (that.p1) initialUsers.p1 = { name: that.p1.name, gravatarHash: that.p1.gravatarHash, uuid: that.p1.uuid, score: that.p1.score };
+    if (that.p2) initialUsers.p2 = { name: that.p2.name, gravatarHash: that.p2.gravatarHash, uuid: that.p2.uuid, score: that.p2.score };
 
     for (var i in that.spectators) {
       initialUsers.spectators.push({ name: that.spectators[i].name

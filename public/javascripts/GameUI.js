@@ -14,7 +14,24 @@ $(function() {
 
   window.GameUI.Templates.spectatorTemplate = _.template($('#spectator-template').html());
 
+  window.GameUI.Templates.goalTemplate = _.template($('#goal-template').html());
+
   window.GameUI.Views = {};
+
+  window.GameUI.Views.GoalView = Backbone.View.extend({
+    template: window.GameUI.Templates.goalTemplate,
+    tagName: 'div',
+    className: 'goal',
+
+    initialize: function() {
+      this.render();
+    },
+
+    render: function() {
+      $(this.el).html(this.template(this.model.toJSON()));
+      $(this.el).appendTo('body');
+    }
+  });
 
   window.GameUI.Views.SpectatorsView = Backbone.View.extend({
     el: '#spectators',
@@ -50,24 +67,25 @@ $(function() {
   window.GameUI.Views.PlayerView = Backbone.View.extend({
     template: window.GameUI.Templates.playerTemplate,
 
+    initialize: function() {
+      this.model = new window.GameUI.Models.PlayerModel();
+
+      this.model.on('change', this.render, this);
+    },
+
     setPlayerNumber: function(playerNumber) {
       this.playerNumber = playerNumber;
     },
 
-    setPlayer: function(playerModel) {
-      this.model = playerModel;
-      this.render();
-    },
-
-    removePlayer: function() {
-      $(this.el).html('');
-    },
-
     render: function() {
-      var data = this.model.toJSON();
-      data.playerNumber = this.playerNumber;
+      if (this.model.get('name')) {
+        var data = this.model.toJSON();
+        data.playerNumber = this.playerNumber;
 
-      $(this.el).html(this.template(data));
+        $(this.el).html(this.template(data));
+      } else {
+        $(this.el).html('');
+      }
     }
   });
 
