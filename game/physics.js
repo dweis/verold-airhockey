@@ -229,7 +229,8 @@ Physics.prototype.getUpdateObject = function() {
     , p2 = this.p1Body.GetPosition()
     , p3 = this.p2Body.GetPosition();
 
-  return [ p1.x, p1.y, p2.x, p2.y, p3.x, p3.y ];
+  return [ parseFloat(p1.x.toFixed(3)), parseFloat(p1.y.toFixed(3)), parseFloat(p2.x.toFixed(3)),
+    parseFloat(p2.y.toFixed(3)), parseFloat(p3.x.toFixed(3)), parseFloat(p3.y.toFixed(3)) ];
 }
 
 Physics.prototype.updatePositionP1 = function(updateObj) {
