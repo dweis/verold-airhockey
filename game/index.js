@@ -37,9 +37,9 @@ var Game = function(io) {
 
   // Constants
   this.fps = 60;
-  this.friction = 0.05;
-  this.density = 0.5;
-  this.restitution = 0.9;
+  this.friction = 0.15;
+  this.density = 0.8;
+  this.restitution = 0.5;
   this.width = 1.25;
   this.height = 2.50;
   this.thickness = 0.01;
