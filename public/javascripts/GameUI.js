@@ -97,7 +97,7 @@ $(function() {
         , email = localStorage.email || '';
 
 
-      window.AirHockey.socket.on('playerRegistered', $.proxy(this.onRegistered, this));
+      window.airHockey.socket.on('playerRegistered', $.proxy(this.onRegistered, this));
       $('#input-name').val(name);
       $('#input-email').val(email);
     },
@@ -120,7 +120,7 @@ $(function() {
       localStorage.email = email;
       console.log('registering...')
 
-      window.AirHockey.socket.emit('playerRegister', { name: name, email: email });
+      window.airHockey.socket.emit('playerRegister', { name: name, email: email });
     },
 
     show: function() {

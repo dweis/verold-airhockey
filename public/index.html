@@ -3,7 +3,6 @@
 <head>
   <meta charset="utf8"/>
   <title>Verold Air Hockey</title>
-  <!--<link rel="stylesheet"href="stylesheets/reset.css">-->
   <link rel="stylesheet" href="stylesheets/style.css">
   <link rel="stylesheet" href="stylesheets/gameui.css">
   <link href='http://fonts.googleapis.com/css?family=Rationale' rel='stylesheet' type='text/css'>
@@ -12,7 +11,7 @@
   <script type="text/javascript" src="javascripts/underscore.js"></script>
   <script type="text/javascript" src="javascripts/backbone.js"></script>
   <script type="text/javascript" src="javascripts/VeroldApp.js"></script>
-  <script type="text/javascript" src="javascripts/MyApp.js"></script>
+  <script type="text/javascript" src="javascripts/AirHockey.js"></script>
   <script type="text/javascript" src="javascripts/GameUI.js"></script>
 </head>
 <body>
@@ -53,12 +52,10 @@
   </div>
 
   <script>
+    var veroldApp = new VeroldApp()
+      , airHockey = new AirHockey(veroldApp);
 
-    var veroldApp = new VeroldApp();
-    console.info(veroldApp);
-    var myApp = new MyApp( veroldApp );
-
-    VAPI.onReady( function() {
+    VAPI.onReady(function() {
       veroldApp.initialize( {
         container : null,
         projectId : "5130099e21d65002000000f6",
@@ -67,13 +64,12 @@
         handleInput: true,
         clearColor: 0xff0000,
         success: function() {
-          myApp.startup();
+          airHockey.startup();
         }
       });
     });
 
-    window.AirHockey = myApp;
-
+    window.airHockey = airHockey;
   </script>
   <script type="text/html" id="spectator-template">
     <div class="spectator">
