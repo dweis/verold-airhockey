@@ -1,6 +1,6 @@
 var _ = require('underscore')
-  , VeroldApp = require('./VeroldApp')
-  , AirHockey = require('./AirHockey');
+  , VeroldApp = require('./verold_app')
+  , AirHockey = require('./air_hockey');
 
 var veroldApp = new VeroldApp()
   , airHockey = new AirHockey(veroldApp);
