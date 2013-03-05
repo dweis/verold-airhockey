@@ -98,6 +98,7 @@ AirHockey.prototype.initScene = function(scene) {
 
   this.socket = io.connect();
 
+  this.socket.on('inactive', function() { alert('You have been booted due to inactivity'); });
   this.socket.on('update', function() { that.socketUpdate.apply(that, arguments); });
   this.socket.on('goal', function(net) { 
     var goalView = new GoalView({ model: (net == 1) ? that.p2View.model : that.p1View.model });

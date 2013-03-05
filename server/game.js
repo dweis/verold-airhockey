@@ -75,6 +75,8 @@ Game.prototype.spectatorRemoved = function(player) {
 Game.prototype.removePlayer = function(player) {
   console.log(player.name + ' has left the game');
   if (this.p1 && this.p1.socket && this.p1.socket.id == player.socket.id) {
+    this.p1.socket.removeListener('position', this.p1._updatePositionFn);
+
     this.p1 = undefined;
 
     if (this.spectators.length) {
@@ -85,6 +87,8 @@ Game.prototype.removePlayer = function(player) {
       this.io.sockets.emit('p1');
     }
   } else if (this.p2 && this.p2.socket && this.p2.socket.id == player.socket.id) {
+    this.p2.socket.removeListener('position', this.p2._updatePositionFn);
+
     this.p2 = undefined;
 
     if (this.spectators.length) {
@@ -140,14 +144,13 @@ Game.prototype._setPlayer = function(key, player) {
   var that = this;
 
   if (this[key]) {
-    this[key].socket.off('position', this[key]._updatePositionFn);
+    this[key].socket.removeListener('position', this[key]._updatePositionFn);
   }
 
   this[key] = player;
 
   this[key]._updatePositionFn = function() {
-    that[key].lastPositionUpdate = Date.now();
-    that.physics['updatePosition' + key.toUpperCase()].apply(that.physics, arguments);
+    player.lastPositionUpdate = Date.now(); that.physics['updatePosition' + key.toUpperCase()].apply(that.physics, arguments);
   }
 
   this[key].socket.on('position', this[key]._updatePositionFn);
@@ -164,14 +167,22 @@ Game.prototype._setPlayer = function(key, player) {
 }
 
 Game.prototype.updateSockets = function() {
-  var timestamp = Date.now();
+  var timestamp = Date.now(), socket;
 
   if (this.p1 && timestamp - this.p1.lastPositionUpdate > this.inactivityTime) {
+    socket = this.p1.socket;
+
     this.removePlayer(this.p1);
+    socket.emit('inactive');
+    socket.disconnect();
   }
 
   if (this.p2 && timestamp - this.p2.lastPositionUpdate > this.inactivityTime) {
+    socket = this.p2.socket;
+
     this.removePlayer(this.p2);
+    socket.emit('inactive');
+    socket.disconnect();
   }
 
   this.io.sockets.emit('update', this.physics.getUpdateObject());
@@ -208,7 +219,6 @@ Game.prototype.initSocketIO = function() {
     }
 
     socket.emit('initialUsers', initialUsers);
-
 
     var player = { socket: socket, uuid: uuid.v4() };
 
