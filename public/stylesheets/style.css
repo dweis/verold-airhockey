@@ -50,3 +50,25 @@ a {
   color: #999;
   text-align: center;
 }
+
+#footer{
+  font-family: 'Open Sans', sans-serif;
+  font-weight:300;
+  position:absolute;
+  bottom:0;
+  width:100%;
+  color:#fff;
+  padding:10px;
+  z-index: 1;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+#footer p {
+  margin-top: -20px;
+  padding: 0px;
+}
+
+#footer img{
+  position:relative;
+  top:16px;
+  margin:0 10px;
+}

@@ -2,10 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="utf8"/>
-  <title>Verold Air Hockey</title>
+  <title>Verold - AIR HOCKEY</title>
   <link rel="stylesheet" href="stylesheets/style.css">
   <link rel="stylesheet" href="stylesheets/gameui.css">
+  <link rel="stylesheet" href="stylesheets/font-awesome.min.css">
   <link href='http://fonts.googleapis.com/css?family=Rationale' rel='stylesheet' type='text/css'>
+  <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
   <script src="/socket.io/socket.io.js"></script>
   <script type="text/javascript" src="http://assets.verold.com/verold_api/verold_api_v1.js"></script>
   <script type="text/javascript" src="javascripts/airhockey.js"></script>
@@ -20,18 +22,48 @@
   <div id="player1" class="player"></div>
   <div id="player2" class="player"></div>
   <div id="spectators"><ul></ul></div>
-  <div id="player-setup">
-    <h1>Air Hockey</h1>
+  <div id="player-setup" class="dialog">
+    <a href="javascript:void(0);" class="settings-close"><i class="icon-remove"></i></a>
     <form id="player-setup-form">
-      <fieldset>
-        <legend>Player Info</legend>
-        <label for="name">Name</label>
-        <input type="text" name="name" id="input-name"/>
-        <label for="name">Email (optional, for <a href="http://gravatar.com">Gravatar</a> image.)</label>
-        <input type="text" name="email" id="input-email"/>
-        <input type="submit" value="Join!"/>
-      </fieldset>
+      <label for="name">Name</label>
+      <input type="text" name="name" id="input-name"/>
+      <label for="name">Email (optional, for <a target="_new" href="http://gravatar.com">Gravatar</a> image.)</label>
+      <input type="text" name="email" id="input-email"/>
+      <input type="submit" value="Join!"/>
     </form>
+  </div>
+  <div id="game-menu" class="menu">
+    <a title="About" href="javascript:void(0);" class="about-button"><i class="icon-question-sign"></i></a>
+    <a title="Credits" href="javascript:void(0);" class="credits-button"><i class="icon-beer"></i></a>
+    <a title="Settings" href="javascript:void(0);" class="settings-button"><i class="icon-cog"></i></a>
+  </div>
+  <div id="about-dialog" class="dialog">
+    <a href="javascript:void(0);" class="about-close"><i class="icon-remove"></i></a>
+    <h1>About</h1>
+
+    <p>
+    This is an Air hockey simulation built on top of the <a href="http://verold.com">Verold API</a>, <a href="http://github.com/mrdoob/three.js">THREE.js</a>, <a href="http://code.google.com/p/box2dweb/">Box2D</a> and <a href="http://socket.io">Socket.IO</a>.
+    </p>
+  </div>
+  <div id="credits-dialog" class="dialog">
+    <a href="javascript:void(0);" class="credits-close"><i class="icon-remove"></i></a>
+    <h1>Credits</h1>
+
+    <p>
+    <strong>Programming and design:</strong> Derrick Weis
+    </p>
+
+    <p>
+    <strong>Assets:</strong>
+
+    <ul>
+      <li>Air Hockey Table: <a target="_new" href="http://www.turbosquid.com/3d-models/3d-max-air-hockey/430629">(turbosquid)</a></li>
+      <li>Floor Texture: <a target="_new" href="http://gamedesignplanet.com/members/archive_free.php">(gamedesignplanet)</a></li>
+    </ul>
+    </p>
+  </div>
+  <div id="footer">
+    <p>Powered by <a href="http://studio.verold.com" target="_blank"><img src="images/verold_logo_white.png" /></a> &amp; <a href="http://mrdoob.github.com/three.js/" target="_blank"><img src="images/three_js_logo.png" height="30" /></a></p>
   </div>
   <div style="display:none;" id="webGLunsupported">
     <p>This demo requires support for webGL.<br />

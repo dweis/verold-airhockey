@@ -156,6 +156,7 @@ Game.prototype._setPlayer = function(key, player) {
   this[key].socket.on('position', this[key]._updatePositionFn);
   this[key].socket.emit('active', { player: key });
 
+  this.physics.reset();
   this.resetScores();
 
   this.io.sockets.emit(key, { name: player.name

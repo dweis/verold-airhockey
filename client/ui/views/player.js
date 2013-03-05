@@ -24,7 +24,6 @@ var PlayerView = Backbone.View.extend({
       for (var i = 0; i < this.model.get('score'); i++) {
         data.score += '&#9733';
       }
-      console.log(data);
 
       $(this.el).html(this.template(data));
     } else {

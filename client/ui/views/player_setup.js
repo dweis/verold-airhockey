@@ -39,6 +39,10 @@ var PlayerSetupView = Backbone.View.extend({
     $(this.el).show();
   },
 
+  hide: function() {
+    $(this.el).hide();
+  },
+
   onRegistered: function() {
     console.log('Registered, hiding dialog...');
     $(this.el).hide();

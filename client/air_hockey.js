@@ -3,6 +3,7 @@ var _ = require('underscore')
   , PlayerModel = require('./ui/models/player')
   , PlayerView = require('./ui/views/player')
   , PlayerSetupView = require('./ui/views/player_setup')
+  , MenuView = require('./ui/views/menu')
   , SpectatorsCollection = require('./ui/collections/spectators')
   , SpectatorsView = require('./ui/views/spectators');
 
@@ -176,6 +177,7 @@ AirHockey.prototype.initUI = function() {
   this.p1View.setPlayerNumber(1);
   this.p2View.setPlayerNumber(2);
   this.playerSetupView = new PlayerSetupView();
+  this.menuView = new MenuView({ playerSetupView: this.playerSetupView });
 
   this.socket.on('connect', function() {
     that.playerSetupView.show();
