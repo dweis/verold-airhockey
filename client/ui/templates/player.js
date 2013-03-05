@@ -5,9 +5,10 @@ _.templateSettings = {
 };
 
 module.exports = _.template(
-  '<div class="player">' +
-  '<img src="{{gravatarUrl}}"/>' +
-  '<h2>Player {{playerNumber}}</h2>' + 
+  '<span style="float: left;">' +
+  '<img src="{{gravatarUrl}}" align="left"/>' +
+  '</span>' +
+  '<span>' +
   '<h1>{{name}}</h1>' +
-  '<p>Score: {{score}}</p>' +
-  '</div>');
+  '<div class="score">{{score}}</div>' +
+  '</span>');

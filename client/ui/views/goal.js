@@ -12,7 +12,6 @@ var GoalView = Backbone.View.extend({
   },
 
   render: function() {
-    console.log('goal template: ', this.template);
     $(this.el).html(this.template(this.model.toJSON()));
     $(this.el).appendTo('body');
   }

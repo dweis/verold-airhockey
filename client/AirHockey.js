@@ -4,7 +4,7 @@ var _ = require('underscore')
   , PlayerView = require('./ui/views/player')
   , PlayerSetupView = require('./ui/views/player_setup')
   , SpectatorsCollection = require('./ui/collections/spectators')
-  , SpectatorsView = require('./ui/views/spectator');
+  , SpectatorsView = require('./ui/views/spectators');
 
 
 AirHockey = function(veroldApp) {
@@ -171,7 +171,7 @@ AirHockey.prototype.initUI = function() {
   this.spectatorsCollection = new SpectatorsCollection();
   this.p1View = new PlayerView({ el: '#player1' });
   this.p2View = new PlayerView({ el: '#player2' });
-  this.specatorsView = new SpectatorsView({ collection: this.spectatorsCollection });
+  this.spectatorsView = new SpectatorsView({ collection: this.spectatorsCollection });
 
   this.p1View.setPlayerNumber(1);
   this.p2View.setPlayerNumber(2);
