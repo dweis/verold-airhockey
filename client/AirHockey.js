@@ -1,3 +1,12 @@
+var _ = require('underscore')
+  , GoalView = require('./ui/views/goal')
+  , PlayerModel = require('./ui/models/player')
+  , PlayerView = require('./ui/views/player')
+  , PlayerSetupView = require('./ui/views/player_setup')
+  , SpectatorsCollection = require('./ui/collections/spectators')
+  , SpectatorsView = require('./ui/views/spectator');
+
+
 AirHockey = function(veroldApp) {
   this.puckEntityId = '513014602fdccc0200000565';
   this.p1PaddleEntityId = '513014612fdccc0200000567';
@@ -91,7 +100,7 @@ AirHockey.prototype.initScene = function(scene) {
 
   this.socket.on('update', function() { that.socketUpdate.apply(that, arguments); });
   this.socket.on('goal', function(net) { 
-    var goalView = new window.GameUI.Views.GoalView({ model: (net == 1) ? that.p2View.model : that.p1View.model });
+    var goalView = new GoalView({ model: (net == 1) ? that.p2View.model : that.p1View.model });
 
     setTimeout(function() {
       goalView.remove();
@@ -113,7 +122,7 @@ AirHockey.prototype.initScene = function(scene) {
       that.p2View.model.set(initialUsers.p2);
     }
     _.each(initialUsers.spectators, function(playerInfo) {
-      that.spectatorsCollection.add(new window.GameUI.Models.PlayerModel(playerInfo));
+      that.spectatorsCollection.add(new PlayerModel(playerInfo));
     });
   });
 
@@ -134,7 +143,7 @@ AirHockey.prototype.initScene = function(scene) {
   });
 
   this.socket.on('spectatorAdd', function(playerInfo) {
-    that.spectatorsCollection.add(new window.GameUI.Models.PlayerModel(playerInfo));
+    that.spectatorsCollection.add(new PlayerModel(playerInfo));
   });
 
   this.socket.on('spectatorRemove', function(playerInfo) {
@@ -158,14 +167,14 @@ AirHockey.prototype.initScene = function(scene) {
 AirHockey.prototype.initUI = function() {
   var that = this;
 
-  this.spectatorsCollection = new window.GameUI.Collections.SpectatorsCollection();
-  this.p1View = new window.GameUI.Views.PlayerView({ el: '#player1' });
-  this.p2View = new window.GameUI.Views.PlayerView({ el: '#player2' });
-  this.specatorsView = new window.GameUI.Views.SpectatorsView({ collection: this.spectatorsCollection });
+  this.spectatorsCollection = new SpectatorsCollection();
+  this.p1View = new PlayerView({ el: '#player1' });
+  this.p2View = new PlayerView({ el: '#player2' });
+  this.specatorsView = new SpectatorsView({ collection: this.spectatorsCollection });
 
   this.p1View.setPlayerNumber(1);
   this.p2View.setPlayerNumber(2);
-  this.playerSetupView = new window.GameUI.Views.PlayerSetupView();
+  this.playerSetupView = new PlayerSetupView();
 
   this.socket.on('connect', function() {
     that.playerSetupView.show();
@@ -270,3 +279,5 @@ AirHockey.prototype.onKeyPress = function( event ) {
     });
   }
 }
+
+module.exports = AirHockey;

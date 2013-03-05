@@ -6,7 +6,9 @@
 var express = require('express')
   , http = require('http')
   , path = require('path')
-  , Game = require('./game')
+  , Game = require('./server/game')
+  , browserify = require('browserify')
+  , browserify_express = require('browserify-express')
   , httpServer, app, io;
 
 app = express();
@@ -22,6 +24,16 @@ app.configure(function(){
   app.use(app.router);
   app.use(express.static(path.join(__dirname, 'public')));
 });
+
+var bundle = browserify_express({
+  entry: __dirname + '/client/index.js',
+  watch: __dirname + '/',
+  mount: '/javascripts/airhockey.js',
+  verbose: true,
+  minify: false
+});
+
+app.use(bundle);
 
 app.configure('development', function(){
   app.use(express.errorHandler());

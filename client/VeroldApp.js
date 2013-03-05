@@ -1,8 +1,11 @@
+/*
+var $ = require('jquery');
+*/
+
 function VeroldApp( properties ) {
   this.el = undefined;
 
   this.veroldEngine = undefined;
-
 }
 
 VeroldApp.prototype = {
@@ -290,3 +293,5 @@ VeroldApp.prototype = {
     }
   }
 }
+
+module.exports = VeroldApp;

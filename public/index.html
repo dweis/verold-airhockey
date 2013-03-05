@@ -8,11 +8,6 @@
   <link href='http://fonts.googleapis.com/css?family=Rationale' rel='stylesheet' type='text/css'>
   <script src="/socket.io/socket.io.js"></script>
   <script type="text/javascript" src="http://assets.verold.com/verold_api/verold_api_v1.js"></script>
-  <script type="text/javascript" src="javascripts/underscore.js"></script>
-  <script type="text/javascript" src="javascripts/backbone.js"></script>
-  <script type="text/javascript" src="javascripts/VeroldApp.js"></script>
-  <script type="text/javascript" src="javascripts/AirHockey.js"></script>
-  <script type="text/javascript" src="javascripts/GameUI.js"></script>
 </head>
 <body>
 
@@ -50,27 +45,6 @@
     <p>This demo requires support for webGL.<br />
     Click <a href="http://verold.com/blog/2013/1/2/enabling-webgl-in-your-browser" target="_blank">here</a> to learn more.</p>
   </div>
-
-  <script>
-    var veroldApp = new VeroldApp()
-      , airHockey = new AirHockey(veroldApp);
-
-    VAPI.onReady(function() {
-      veroldApp.initialize( {
-        container : null,
-        projectId : "5130099e21d65002000000f6",
-        enablePostProcess: false,
-        enablePicking: true,
-        handleInput: true,
-        clearColor: 0xff0000,
-        success: function() {
-          airHockey.startup();
-        }
-      });
-    });
-
-    window.airHockey = airHockey;
-  </script>
   <script type="text/html" id="spectator-template">
     <div class="spectator">
       <img src="{{gravatarUrl}}"/>
@@ -89,5 +63,6 @@
     GOAL!
     <p>{{name}} scored!</p>
   </script>
+  <script type="text/javascript" src="javascripts/airhockey.js"></script>
 </body>
 </html>
