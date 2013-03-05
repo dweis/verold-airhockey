@@ -8,27 +8,20 @@
   <link href='http://fonts.googleapis.com/css?family=Rationale' rel='stylesheet' type='text/css'>
   <script src="/socket.io/socket.io.js"></script>
   <script type="text/javascript" src="http://assets.verold.com/verold_api/verold_api_v1.js"></script>
+  <script type="text/javascript" src="javascripts/airhockey.js"></script>
 </head>
 <body>
-
   <div id="loading-progress-container">
     <p>Loading...</p>
     <div class="loading-progress">
       <div>&nbsp;</div>
     </div>
   </div>
-
-  <div id="player1">
-  </div>
-  <div id="player2">
-  </div>
-  <div id="spectators">
-    <ul></ul>
-  </div>
-
+  <div id="player1"></div>
+  <div id="player2"></div>
+  <div id="spectators"><ul></ul></div>
   <div id="player-setup">
     <h1>Air Hockey</h1>
-
     <form id="player-setup-form">
       <fieldset>
         <legend>Player Info</legend>
@@ -40,29 +33,9 @@
       </fieldset>
     </form>
   </div>
-
   <div style="display:none;" id="webGLunsupported">
     <p>This demo requires support for webGL.<br />
     Click <a href="http://verold.com/blog/2013/1/2/enabling-webgl-in-your-browser" target="_blank">here</a> to learn more.</p>
   </div>
-  <script type="text/html" id="spectator-template">
-    <div class="spectator">
-      <img src="{{gravatarUrl}}"/>
-      <h1>{{name}}</h1>
-    </div>
-  </script>
-  <script type="text/html" id="player-template">
-    <div class="player">
-      <img src="{{gravatarUrl}}"/>
-      <h2>Player {{playerNumber}}</h2>
-      <h1>{{name}}</h1>
-      <p>Score: {{score}}</p>
-    </div>
-  </script>
-  <script type="text/html" id="goal-template">
-    GOAL!
-    <p>{{name}} scored!</p>
-  </script>
-  <script type="text/javascript" src="javascripts/airhockey.js"></script>
 </body>
 </html>

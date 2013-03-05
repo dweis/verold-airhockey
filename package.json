@@ -14,6 +14,10 @@
     "jade": "0.28.1",
     "box2dweb-commonjs": "2.1.0",
     "socket.io": "0.9.13",
-    "node-uuid": "1.4.0"
-  }
+    "node-uuid": "1.4.0",
+    "backbone": "0.9.10",
+    "browserify": "2.4.1",
+    "underscore": "1.4.4",
+    "browserify-express": "0.0.3"
+ }
 }

@@ -1,10 +1,10 @@
 var Backbone = require('backbone')
   , _ = require('underscore')
-  //, $ = require('jquery')
-  , PlayerModel = require('../models/player');
+  , PlayerModel = require('../models/player')
+  , playerTemplate = require('../templates/player');
 
 var PlayerView = Backbone.View.extend({
-  template: _.template($('#player-template').html()),
+  template: playerTemplate,
 
   initialize: function() {
     this.model = new PlayerModel();

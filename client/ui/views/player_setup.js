@@ -1,6 +1,5 @@
 var Backbone = require('backbone')
-  , _ = require('underscore')
-  //, $ = require('jquery');
+  , _ = require('underscore');
 
 var PlayerSetupView = Backbone.View.extend({
   el: '#player-setup',

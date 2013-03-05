@@ -2,10 +2,6 @@ var _ = require('underscore')
   , VeroldApp = require('./VeroldApp')
   , AirHockey = require('./AirHockey');
 
-_.templateSettings = {
-    interpolate : /\{\{(.+?)\}\}/g
-};
-
 var veroldApp = new VeroldApp()
   , airHockey = new AirHockey(veroldApp);
 

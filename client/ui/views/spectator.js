@@ -1,9 +1,9 @@
 var Backbone = require('backbone')
   , _ = require('underscore')
-  //, $ = require('jquery');
+  , spectatorTemplate = require('../templates/spectator');
 
 var SpectatorView = Backbone.View.extend({
-  template: _.template($('#spectator-template').html()),
+  template: spectatorTemplate,
   tagName: 'li',
   render: function() {
     $(this.el).html(this.template(this.model.toJSON()));

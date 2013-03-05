@@ -1,6 +1,5 @@
 var Backbone = require('backbone')
   , _ = require('underscore')
-  //, $ = require('jquery')
   , SpectatorView = require('./spectator');
 
 var SpectatorsView = Backbone.View.extend({
