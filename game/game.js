@@ -3,11 +3,16 @@ var crypto = require('crypto')
   , Physics = require('./physics');
 
 function md5(string) {
-  return crypto.createHash('md5').update(string).digest('hex');
+  return crypto
+    .createHash('md5')
+    .update(string)
+    .digest('hex');
 }
 
 var Game = function(io) {
-  this.fps = 60;
+  this.physicsFreq = 60;
+  this.socketsFreq = 30;
+  this.inactivityTime = 10000;
 
   this.io = io;
   this.physics = new Physics();
@@ -28,8 +33,12 @@ Game.prototype.init = function() {
   });
 
   setInterval(function() {
-    that.update();
-  }, 1000 / this.fps);
+    that.updateSockets();
+  }, 1000 / this.socketsFreq);
+
+  setInterval(function() {
+    that.updatePhysics();
+  }, 1000 / this.physicsFreq);
 
   setInterval(function() {
     that.logStatus();
@@ -51,15 +60,16 @@ Game.prototype.addPlayer = function(player) {
     this.setP2(player);
   } else {
     this.spectators.push(player);
-    this.io.sockets.emit('spectatorAdd', { name: player.name, gravatarHash: player.gravatarHash, uuid: player.uuid });
+    this.io.sockets.emit('spectatorAdd', { name: player.name
+                                         , gravatarHash: player.gravatarHash
+                                         , uuid: player.uuid });
   }
 }
 
 Game.prototype.spectatorRemoved = function(player) {
-  this.io.sockets.emit('spectatorRemove', {
-        name: player.name
-      , gravatarHash: player.gravatarHash
-      , uuid: player.uuid });
+  this.io.sockets.emit('spectatorRemove', { name: player.name
+                                          , gravatarHash: player.gravatarHash
+                                          , uuid: player.uuid });
 }
 
 Game.prototype.removePlayer = function(player) {
@@ -112,67 +122,69 @@ Game.prototype.updateScores = function() {
 }
 
 Game.prototype.resetScores = function() {
-  if (this.p1)
-    this.p1.score = 0;
-
-  if (this.p2)
-    this.p2.score = 0;
+  if (this.p1) this.p1.score = 0;
+  if (this.p2) this.p2.score = 0;
 
   this.updateScores();
 }
 
 Game.prototype.setP1 = function(player) {
-  this.p1 = player;
-
-  // fix me, will cause memory leaks?
-  this.p1.socket.on('position', this.updatePositionP1());
-  this.p1.socket.emit('active', { player: 'p1' });
-
-  this.resetScores();
-
-  this.io.sockets.emit('p1', { name: player.name, gravatarHash: player.gravatarHash, uuid: player.uuid, score: this.p1.score });
-
-  console.log(this.p1.name + ' has become player 1');
+  this._setPlayer('p1', player);
 }
 
 Game.prototype.setP2 = function(player) {
-  this.p2 = player;
+  this._setPlayer('p2', player);
+}
 
-  // fix me, will cause memory leaks?
-  this.p2.socket.on('position', this.updatePositionP2());
-  this.p2.socket.emit('active', { player: 'p2' });
+Game.prototype._setPlayer = function(key, player) {
+  var that = this;
+
+  if (this[key]) {
+    this[key].socket.off('position', this[key]._updatePositionFn);
+  }
+
+  this[key] = player;
+
+  this[key]._updatePositionFn = function() {
+    that[key].lastPositionUpdate = Date.now();
+    that.physics['updatePosition' + key.toUpperCase()].apply(that.physics, arguments);
+  }
+
+  this[key].socket.on('position', this[key]._updatePositionFn);
+  this[key].socket.emit('active', { player: key });
 
   this.resetScores();
 
-  this.io.sockets.emit('p2', { name: player.name, gravatarHash: player.gravatarHash, uuid: player.uuid, score: this.p2.score });
+  this.io.sockets.emit(key, { name: player.name
+                            , gravatarHash: player.gravatarHash
+                            , uuid: player.uuid
+                            , score: this[key].score });
 
-  console.log(this.p2.name + ' has become player 2');
+  console.log(player.name + ' has become ' + key);
 }
 
-Game.prototype.updatePositionP1 = function() {
-  var that = this;
-  return function() {
-    that.physics.updatePositionP1.apply(that.physics, arguments);
+Game.prototype.updateSockets = function() {
+  var timestamp = Date.now();
+
+  if (this.p1 && timestamp - this.p1.lastPositionUpdate > this.inactivityTime) {
+    this.removePlayer(this.p1);
   }
-}
 
-Game.prototype.updatePositionP2 = function() {
-  var that = this;
-  return function() {
-    that.physics.updatePositionP2.apply(that.physics, arguments);
+  if (this.p2 && timestamp - this.p2.lastPositionUpdate > this.inactivityTime) {
+    this.removePlayer(this.p2);
   }
-}
 
-Game.prototype.update = function() {
   this.io.sockets.emit('update', this.physics.getUpdateObject());
+}
 
+Game.prototype.updatePhysics = function() {
   if (this.playing && !Object.keys(this.io.connected).length) {
     this.playing = false;
     this.physics.reset();
   }
 
   if (this.playing) {
-    this.physics.update(1 / this.fps);
+    this.physics.update(1 / this.physicsFreq);
   }
 }
 
