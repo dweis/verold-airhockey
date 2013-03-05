@@ -100,7 +100,6 @@ $(function() {
       window.AirHockey.socket.on('playerRegistered', $.proxy(this.onRegistered, this));
       $('#input-name').val(name);
       $('#input-email').val(email);
-      $(this.el).show();
     },
 
     events: {
@@ -119,8 +118,13 @@ $(function() {
 
       localStorage.name = name;
       localStorage.email = email;
+      console.log('registering...')
 
       window.AirHockey.socket.emit('playerRegister', { name: name, email: email });
+    },
+
+    show: function() {
+      $(this.el).show();
     },
 
     onRegistered: function() {

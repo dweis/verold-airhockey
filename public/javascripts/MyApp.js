@@ -167,9 +167,10 @@ MyApp.prototype.initUI = function() {
 
   this.p1View.setPlayerNumber(1);
   this.p2View.setPlayerNumber(2);
+  this.playerSetupView = new window.GameUI.Views.PlayerSetupView();
 
   this.socket.on('connect', function() {
-    that.playerSetupView = new window.GameUI.Views.PlayerSetupView();
+    that.playerSetupView.show();
   });
 }
 
