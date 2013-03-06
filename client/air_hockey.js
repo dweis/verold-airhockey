@@ -29,6 +29,10 @@ AirHockey = function(veroldApp) {
   this.tableHeight = 2.5;
 
   this.mode = 'spectator';
+
+  this.originalMaterials = {};
+
+  this.lowQuality = false;
 }
 
 AirHockey.prototype.setSpectatorView = function() {
@@ -57,6 +61,58 @@ AirHockey.prototype.lookAtTable = function() {
   lookAt.add( this.table.threeData.position );
 
   this.camera.lookAt( lookAt );
+}
+
+AirHockey.prototype.useLowQualityMaterials = function() {
+  var that = this
+    , meshes = this.mainScene.getAllObjects( { "filter" : { "mesh": true }})
+    , lqTableMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, opacity: 1, wireframe: false } )//new THREE.MeshPhongMaterial( { ambient: 0xffffff, color: 0xffffff, specular: 0xffffff, shininess: 50, shading: THREE.SmoothShading } )
+    , lqPaddleMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, opacity: 1, wireframe: false } )//new THREE.MeshPhongMaterial( { ambient: 0x555555, color: 0xff0000, specular: 0xffffff, shininess: 50, shading: THREE.SmoothShading } )
+    , lqPuckMaterial =  new THREE.MeshBasicMaterial( { color: 0x000000, opacity: 1, wireframe: false } )//new THREE.MeshPhongMaterial( { ambient: 0x555555, color: 0x000000, specular: 0xffffff, shininess: 50, shading: THREE.SmoothShading } );
+    , lqDefaultMaterial = new THREE.MeshBasicMaterial( { color: 0x555555, opacity: 1, wireframe: false });
+
+  if (!this.lowQuality) {
+    _.each(meshes, function(mesh) {
+      var parentObjectId = mesh.getParentObject().id;
+
+      that.originalMaterials[mesh.id] = mesh.threeData.material;
+
+      if (parentObjectId == that.p1PaddleEntityId || parentObjectId == that.p2PaddleEntityId) {
+        mesh.threeData.material = lqPaddleMaterial;
+      } else if (parentObjectId == that.puckEntityId) {
+        mesh.threeData.material = lqPuckMaterial;
+      } else if (parentObjectId == '5130146e21d650020000011c') {
+        mesh.threeData.material = lqTableMaterial;
+      } else {
+        mesh.threeData.material = lqDefaultMaterial;
+      }
+    });
+
+    this.lowQuality = true;
+  }
+}
+
+AirHockey.prototype.restoreMaterials = function() {
+  var that = this
+    , meshes = this.mainScene.getAllObjects( { "filter" : { "mesh": true }});
+
+  if (this.lowQuality) {
+    _.each(meshes, function(mesh) {
+      if (that.originalMaterials[mesh.id]) {
+        mesh.threeData.material = that.originalMaterials[mesh.id];
+      }
+    });
+
+    this.lowQuality = false;
+  }
+}
+
+AirHockey.prototype.toggleMaterials = function() {
+  if (this.lowQuality) {
+    this.restoreMaterials();
+  } else {
+    this.useLowQualityMaterials();
+  }
 }
 
 AirHockey.prototype.initScene = function(scene) {
@@ -271,13 +327,15 @@ AirHockey.prototype.onKeyPress = function( event ) {
   if ( event.keyCode === keyCodes['B'] ) {
     var that = this;
     this.boundingBoxesOn = !this.boundingBoxesOn;
-    var scene = veroldApp.getActiveScene();
+    var scene = this.veroldApp.getActiveScene();
 
     scene.traverse( function( obj ) {
       if ( obj.isBB ) {
         obj.visible = that.boundingBoxesOn;
       }
     });
+  } else if (event.keyCode == keyCodes['M'] ) {
+    this.toggleMaterials();
   }
 }
 
