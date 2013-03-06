@@ -30,9 +30,11 @@ AirHockey = function(veroldApp) {
 
   this.mode = 'spectator';
 
-  this.originalMaterials = {};
-
+  this.useShadows = true;
+  this.forceLowQuality = false;
   this.lowQuality = false;
+
+  this.touching = false;
 }
 
 AirHockey.prototype.setSpectatorView = function() {
@@ -65,28 +67,28 @@ AirHockey.prototype.lookAtTable = function() {
 
 AirHockey.prototype.useLowQualityMaterials = function() {
   var that = this
-    , meshes = this.mainScene.getAllObjects( { "filter" : { "mesh": true }})
-    , lqTableMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, opacity: 1, wireframe: false } )//new THREE.MeshPhongMaterial( { ambient: 0xffffff, color: 0xffffff, specular: 0xffffff, shininess: 50, shading: THREE.SmoothShading } )
-    , lqPaddleMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, opacity: 1, wireframe: false } )//new THREE.MeshPhongMaterial( { ambient: 0x555555, color: 0xff0000, specular: 0xffffff, shininess: 50, shading: THREE.SmoothShading } )
-    , lqPuckMaterial =  new THREE.MeshBasicMaterial( { color: 0x000000, opacity: 1, wireframe: false } )//new THREE.MeshPhongMaterial( { ambient: 0x555555, color: 0x000000, specular: 0xffffff, shininess: 50, shading: THREE.SmoothShading } );
-    , lqDefaultMaterial = new THREE.MeshBasicMaterial( { color: 0x555555, opacity: 1, wireframe: false });
+    , meshes = this.mainScene.getAllObjects( { "filter" : { "mesh": true }});
 
   if (!this.lowQuality) {
     _.each(meshes, function(mesh) {
-      var parentObjectId = mesh.getParentObject().id;
+      var materialId = mesh.getSourceObject().entityModel.get('payload').material;
+      var materialAsset = that.assetRegistry.getAsset(materialId);
+      var materialData = (materialAsset && materialAsset.entityModel.get('payload')) || {};
+      var parentObjectId = (mesh.getParentObject && mesh.getParentObject().id) || 'ground';
+      var params = {};
 
-      that.originalMaterials[mesh.id] = mesh.threeData.material;
+      params.color = materialData.diffuseColor;
+      params.ambient = 0x000000;
+      //if (materialAsset.threeData.map) {
+        //params.map = materialAsset.threeData.map;
+      //}
 
-      if (parentObjectId == that.p1PaddleEntityId || parentObjectId == that.p2PaddleEntityId) {
-        mesh.threeData.material = lqPaddleMaterial;
-      } else if (parentObjectId == that.puckEntityId) {
-        mesh.threeData.material = lqPuckMaterial;
-      } else if (parentObjectId == '5130146e21d650020000011c') {
-        mesh.threeData.material = lqTableMaterial;
-      } else {
-        mesh.threeData.material = lqDefaultMaterial;
-      }
+      mesh.threeData.originalMaterial = mesh.threeData.material;
+      mesh.threeData.material = new THREE.MeshLambertMaterial(params);
     });
+
+    this.mainScene.threeData.ground.originalMaterial = this.mainScene.threeData.ground.material;
+    this.mainScene.threeData.ground.material = new THREE.MeshLambertMaterial({ color: 0x555555 });
 
     this.lowQuality = true;
   }
@@ -96,12 +98,14 @@ AirHockey.prototype.restoreMaterials = function() {
   var that = this
     , meshes = this.mainScene.getAllObjects( { "filter" : { "mesh": true }});
 
-  if (this.lowQuality) {
+  if (!this.forceLowQuality && this.lowQuality) {
     _.each(meshes, function(mesh) {
-      if (that.originalMaterials[mesh.id]) {
-        mesh.threeData.material = that.originalMaterials[mesh.id];
+      if (mesh.threeData.originalMaterial) {
+        mesh.threeData.material = mesh.threeData.originalMaterial;
       }
     });
+
+    this.mainScene.threeData.ground.material = this.mainScene.threeData.ground.originalMaterial;
 
     this.lowQuality = false;
   }
@@ -120,7 +124,13 @@ AirHockey.prototype.initScene = function(scene) {
     , models = scene.getAllObjects( { "filter" :{ "model" : true }})
     , lights = scene.getAllObjects( { "filter" : { "light" : true }});
 
-  this.mainScene = scene;
+  this.mainScene = window.mainScene = scene;
+  this.assetRegistry = this.veroldApp.getAssetRegistry();
+
+  if (this.forceLowQuality) {
+    this.useLowQualityMaterials();
+  }
+  //this.toggleMaterials();
 
   // hide progress indicator
   this.veroldApp.hideLoadingProgress();
@@ -135,6 +145,7 @@ AirHockey.prototype.initScene = function(scene) {
   this.veroldApp.on("mouseMove", this.onMouseMove, this);
   this.veroldApp.on("update", this.update, this );
 
+  document.addEventListener("touchmove", $.proxy(this.onTouchMove, this), true);
 
   scene.removeChildObject(lights[_.keys(lights)[1]]);
   //scene.removeChildObject(lights[_.keys(lights)[2]]);
@@ -252,8 +263,27 @@ AirHockey.prototype.socketUpdate = function(updateObj) {
   }
 }
 
+AirHockey.prototype.detectCapabilities = function() {
+  var ua = navigator.userAgent.toLowerCase();
+
+  if (ua.indexOf('android') >= 0) {
+    this.forceLowQuality = true;
+    this.useShadows = false;
+  } else if (ua.match(/ipad|iphone|ipod/g)) {
+    this.forceLowQuality = true;
+    this.useShadows = false;
+  }
+}
+
 AirHockey.prototype.startup = function() {
   var that = this;
+
+  this.detectCapabilities();
+
+  this.veroldApp.getRenderer().shadowMapEnabled = this.useShadows;
+
+  //this.veroldApp.getRenderer().shadowMapEnabled = true;
+  //this.veroldApp.getRenderer().shadowMapType = THREE.BasicShadowMap;
 
 	this.veroldApp.loadScene( null, {
     success_hierarchy: function( scene ) {
@@ -320,6 +350,13 @@ AirHockey.prototype.onMouseMove = function(event) {
 
     this.socket.emit('position', update);
   }
+}
+
+AirHockey.prototype.onTouchMove = function(event){
+  event.preventDefault();
+  var touches = event.changedTouches, first = touches[0];
+
+  this.onMouseMove({ clientX: first.clientX, clientY: first.clientY });
 }
 
 AirHockey.prototype.onKeyPress = function( event ) {
