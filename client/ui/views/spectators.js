@@ -5,15 +5,14 @@ var Backbone = require('backbone')
 var SpectatorsView = Backbone.View.extend({
   el: '#spectators',
 
-  initialize: function() {
+  initialize: function(options) {
     this.collection.on('add', this.spectatorAdded, this);
     this.collection.on('remove', this.spectatorRemoved, this);
-    this.subViews = [];
+    this.socket = options.socket;
   },
 
   spectatorAdded: function(model) {
-    var view = new SpectatorView({ model: model });
-    this.subViews.push(view);
+    var view = new SpectatorView({ model: model, socket: this.socket });
     view.render();
     model.view = view;
 
@@ -21,7 +20,7 @@ var SpectatorsView = Backbone.View.extend({
   },
 
   spectatorRemoved: function(model) {
-    model.view.remove();
+    model.view.close();
   }
 });
 

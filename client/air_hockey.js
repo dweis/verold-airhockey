@@ -170,13 +170,11 @@ AirHockey.prototype.initUI = function() {
   var that = this;
 
   this.spectatorsCollection = new SpectatorsCollection();
-  this.p1View = new PlayerView({ el: '#player1' });
-  this.p2View = new PlayerView({ el: '#player2' });
-  this.spectatorsView = new SpectatorsView({ collection: this.spectatorsCollection });
+  this.p1View = new PlayerView({ el: '#player1', socket: this.socket });
+  this.p2View = new PlayerView({ el: '#player2', socket: this.socket });
+  this.spectatorsView = new SpectatorsView({ collection: this.spectatorsCollection, socket: this.socket });
 
-  this.p1View.setPlayerNumber(1);
-  this.p2View.setPlayerNumber(2);
-  this.playerSetupView = new PlayerSetupView();
+  this.playerSetupView = new PlayerSetupView({ socket: this.socket });
   this.menuView = new MenuView({ playerSetupView: this.playerSetupView });
 
   this.socket.on('connect', function() {

@@ -224,15 +224,30 @@ Game.prototype.initSocketIO = function() {
     var player = { socket: socket, uuid: uuid.v4() };
 
     socket.on('playerRegister', function(playerInfo) {
-      player.name = playerInfo.name.trim();
       player.gravatarHash = md5(playerInfo.email.trim() ||
           ('guest+' + Math.floor(Math.random() * 1000)) + '@airhockey.jit.su');
 
-      console.log('Player registered: %s', player.name);
+      if (!player.name) {
+        player.name = playerInfo.name.trim();
 
-      socket.emit('playerRegistered', { name: player.name, gravatarHash: player.gravatarHash, uuid: player.uuid });
+        console.log('Player registered: %s', player.name);
 
-      that.addPlayer(player);
+        socket.emit('playerRegistered', {
+          name: player.name,
+          gravatarHash: player.gravatarHash,
+          uuid: player.uuid });
+
+        that.addPlayer(player);
+      } else {
+        player.name = playerInfo.name.trim();
+
+        console.log('Player modified: %s', player.name);
+
+        that.io.sockets.emit('playerModified', {
+          name: player.name,
+          gravatarHash: player.gravatarHash,
+          uuid: player.uuid });
+      }
     });
 
     socket.on('disconnect', function() {

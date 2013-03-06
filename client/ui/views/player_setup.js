@@ -4,11 +4,13 @@ var Backbone = require('backbone')
 var PlayerSetupView = Backbone.View.extend({
   el: '#player-setup',
 
-  initialize: function() {
+  initialize: function(options) {
     var name = localStorage.name || 'Guest' + Math.floor(Math.random() * 1000)
       , email = localStorage.email || '';
 
-    window.airHockey.socket.on('playerRegistered', $.proxy(this.onRegistered, this));
+    this.socket = options.socket;
+
+    this.socket.on('playerRegistered', $.proxy(this.onRegistered, this));
 
     $('#input-name').val(name);
     $('#input-email').val(email);
