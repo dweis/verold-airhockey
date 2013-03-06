@@ -13,14 +13,17 @@ AirHockey = function(veroldApp) {
   this.p1PaddleEntityId = '513014612fdccc0200000567';
   this.p2PaddleEntityId = '51301584427fe90200000751';
   this.tableEntityId = '5130146e21d650020000011b';
+  this.surfaceMeshId = '5130146e21d6500200000121';
 
   this.veroldApp = veroldApp;
   this.mainScene = undefined;
   this.camera = undefined;
+  this.projector = new THREE.Projector();
   this.p1Paddle = undefined;
   this.p2Paddle = undefined;
   this.puck = undefined;
   this.table = undefined;
+  this.surface = undefined;
 
   this.width = window.innerWidth;
   this.height = window.innerHeight;
@@ -155,6 +158,7 @@ AirHockey.prototype.initScene = function(scene) {
   this.p2Paddle = models[this.p2PaddleEntityId];
   this.table = models[this.tableEntityId];
   this.puck = models[this.puckEntityId];
+  this.surface = mainScene.getObject(this.surfaceMeshId);
 
   //Create the camera
   this.camera = new THREE.PerspectiveCamera( 70, this.width / this.height, 0.1, 10000 );
@@ -253,7 +257,7 @@ AirHockey.prototype.socketUpdate = function(updateObj) {
   var that = this;
   var translate = function(obj, x, y, angle) {
     obj.threeData.position.x = (x - (that.tableWidth * 0.5)) * 0.71;
-    obj.threeData.position.z = (y - (that.tableHeight * 0.5)) * 0.72;
+    obj.threeData.position.z = (y - (that.tableHeight * 0.5)) * 0.71;
   }
 
   if (this.table) {
@@ -326,29 +330,30 @@ AirHockey.prototype.onMouseUp = function( event ) {
 
 AirHockey.prototype.onMouseMove = function(event) {
   if (this.mode == 'p1' || this.mode == 'p2') {
-    var minX = this.width / 3
-      , maxX = this.width - (this.width / 3)
-      , minY = (this.height / 4)
-      , maxY = this.height - (this.height / 4)
-      , rangeX = maxX - minX
-      , rangeY = maxY - minY
-      , x = event.clientX
-      , y = event.clientY
-      , targetX
-      , targetY
-      , update;
+    var vector = new THREE.Vector3( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1, 0.5 );
+    this.projector.unprojectVector( vector, this.camera );
+    var raycaster = new THREE.Raycaster( this.camera.position, vector.sub( this.camera.position ).normalize() );
 
-    if (x > maxX) x = maxX;
-    if (x < minX) x = minX;
-    if (y > maxY) y = maxY;
-    if (y < minY) y = minY;
+    var intersects = raycaster.intersectObjects([this.surface.threeData])
+    var x, y;
 
-    targetX = ((x - minX) / rangeX);
-    targetY = ((y - minY) / rangeY);
+    if (intersects[0]) {
+      var pos = {
+        x: (this.tableWidth / 2) + intersects[0].point.x
+      , y: intersects[0].point.z };
 
-    update = { x: targetX, y: targetY };
+      if (this.mode == 'p1') {
+        pos.x -= 0.1;
+        pos.y -= 0.1;
+        pos.y = (pos.y <= 0) ? pos.y : 0;
+      } else {
+        pos.x -= 0.1;
+        pos.y += 0.1;
+        pos.y = (pos.y >= 0) ? pos.y : 0;
+      }
 
-    this.socket.emit('position', update);
+      this.socket.emit('position', pos);
+    }
   }
 }
 

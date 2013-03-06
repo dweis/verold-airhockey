@@ -234,7 +234,7 @@ Physics.prototype.getUpdateObject = function() {
 }
 
 Physics.prototype.updatePositionP1 = function(updateObj) {
-  var target = { x: this.width - (updateObj.x * this.width), y: (this.height/2) -((updateObj.y * this.height) * 0.5) };
+  var target = { x: (updateObj.x * this.width), y: (this.height/2) + ((updateObj.y * this.height) * 0.5) };
 
   this.p1MouseJoint.SetTarget(target);
 }
