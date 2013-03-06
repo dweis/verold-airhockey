@@ -1,6 +1,6 @@
 var crypto = require('crypto')
   , uuid = require('node-uuid')
-  , Physics = require('./physics');
+  , Physics = require('../common/physics');
 
 function md5(string) {
   return crypto
@@ -11,7 +11,7 @@ function md5(string) {
 
 var Game = function(io) {
   this.physicsFreq = 60;
-  this.socketsFreq = 35;
+  this.socketsFreq = 5;
   this.inactivityTime = 120 * 1000;
 
   this.io = io;

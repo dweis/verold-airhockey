@@ -5,8 +5,8 @@ var _ = require('underscore')
   , PlayerSetupView = require('./ui/views/player_setup')
   , MenuView = require('./ui/views/menu')
   , SpectatorsCollection = require('./ui/collections/spectators')
-  , SpectatorsView = require('./ui/views/spectators');
-
+  , SpectatorsView = require('./ui/views/spectators')
+  , Physics = require('../common/physics');
 
 AirHockey = function(veroldApp) {
   this.puckEntityId = '513014602fdccc0200000565';
@@ -38,6 +38,8 @@ AirHockey = function(veroldApp) {
   this.lowQuality = false;
 
   this.touching = false;
+
+  this.physics = new Physics();
 }
 
 AirHockey.prototype.setSpectatorView = function() {
@@ -130,6 +132,8 @@ AirHockey.prototype.initScene = function(scene) {
   this.mainScene = window.mainScene = scene;
   this.assetRegistry = this.veroldApp.getAssetRegistry();
 
+  this.physics.init();
+
   if (this.forceLowQuality) {
     this.useLowQualityMaterials();
   }
@@ -143,10 +147,11 @@ AirHockey.prototype.initScene = function(scene) {
   this.picker = this.veroldApp.getPicker();
 
   //Bind to input events to control the camera
-  this.veroldApp.on("keyDown", this.onKeyPress, this);
-  this.veroldApp.on("mouseUp", this.onMouseUp, this);
-  this.veroldApp.on("mouseMove", this.onMouseMove, this);
-  this.veroldApp.on("update", this.update, this );
+  this.veroldApp.on('keyDown', this.onKeyPress, this);
+  this.veroldApp.on('mouseUp', this.onMouseUp, this);
+  this.veroldApp.on('mouseMove', this.onMouseMove, this);
+  this.veroldApp.on('update', this.update, this );
+  this.veroldApp.on('fixedUpdate', this.fixedUpdate, this );
 
   document.addEventListener("touchmove", $.proxy(this.onTouchMove, this), true);
 
@@ -254,17 +259,7 @@ AirHockey.prototype.initUI = function() {
 }
 
 AirHockey.prototype.socketUpdate = function(updateObj) {
-  var that = this;
-  var translate = function(obj, x, y, angle) {
-    obj.threeData.position.x = (x - (that.tableWidth * 0.5)) * 0.71;
-    obj.threeData.position.z = (y - (that.tableHeight * 0.5)) * 0.71;
-  }
-
-  if (this.table) {
-    translate(this.puck, updateObj[0], updateObj[1]);
-    translate(this.p1Paddle, updateObj[2], updateObj[3]);
-    translate(this.p2Paddle, updateObj[4], updateObj[5]);
-  }
+  this.physics.setFromUpdateObject(updateObj);
 }
 
 AirHockey.prototype.detectCapabilities = function() {
@@ -303,13 +298,31 @@ AirHockey.prototype.startup = function() {
 }
 
 AirHockey.prototype.shutdown = function() {
-  this.veroldApp.off("keyDown", this.onKeyPress, this);
-  this.veroldApp.off("mouseUp", this.onMouseUp, this);
-  this.veroldApp.off("mouseMove", this.onMouseMove, this);
-  this.veroldApp.off("update", this.update, this );
+  this.veroldApp.off('keyDown', this.onKeyPress, this);
+  this.veroldApp.off('mouseUp', this.onMouseUp, this);
+  this.veroldApp.off('mouseMove', this.onMouseMove, this);
+  this.veroldApp.off('update', this.update, this );
+  this.veroldApp.off('fixedUpdate', this.fixedUpdate, this);
 }
 
 AirHockey.prototype.update = function( delta ) {
+  var that = this;
+  var translate = function(obj, x, y, angle) {
+    obj.threeData.position.x = (x - (that.tableWidth * 0.5)) * 0.71;
+    obj.threeData.position.z = (y - (that.tableHeight * 0.5)) * 0.71;
+  }
+
+  var updateObj = this.physics.getUpdateObject();
+
+  if (this.table) {
+    translate(this.puck, updateObj[0], updateObj[1]);
+    translate(this.p1Paddle, updateObj[2], updateObj[3]);
+    translate(this.p2Paddle, updateObj[4], updateObj[5]);
+  }
+}
+
+AirHockey.prototype.fixedUpdate = function( delta ) {
+  this.physics.update(1/60);
 }
 
 AirHockey.prototype.onMouseUp = function( event ) {
