@@ -2,10 +2,10 @@ var _ = require('underscore')
   , VeroldApp = require('./verold_app')
   , AirHockey = require('./air_hockey');
 
-var veroldApp = new VeroldApp()
-  , airHockey = new AirHockey(veroldApp);
-
 $(function() {
+  var veroldApp = new VeroldApp()
+    , airHockey = new AirHockey(veroldApp);
+
   VAPI.onReady(function() {
     veroldApp.initialize( {
       container : null,
@@ -14,9 +14,7 @@ $(function() {
       enablePicking: true,
       handleInput: true,
       clearColor: 0xff0000,
-      success: function() {
-        airHockey.startup();
-      }
+      success: airHockey.startup
     });
   });
 });
