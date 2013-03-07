@@ -15,6 +15,8 @@ var events = require('events')
   , b2DebugDraw = Box2D.Dynamics.b2DebugDraw;
 
 var Physics = function() {
+  this.delta = 0;
+  this.lastTs = 0;
   this.world = undefined;
   this.puckBody = undefined;
   this.p1 = undefined;
@@ -26,8 +28,8 @@ var Physics = function() {
 
   // Constants
   this.friction = 0.15;
-  this.density = 0.8;
-  this.restitution = 0.5;
+  this.density = 1;
+  this.restitution = 0.4;
   this.width = 1.25;
   this.height = 2.50;
   this.thickness = 0.01;
@@ -119,15 +121,15 @@ Physics.prototype.initContactListener = function() {
 
 Physics.prototype.initMouseJoints = function() {
   var md = new b2MouseJointDef();
+  md.maxForce = 200.0 * this.p1Body.GetMass();
+  md.frequencyHz = 60;
+  md.dampingRatio = 2.0;
+  md.collideConnected = true;
 
   // p1
   md.bodyA = this.world.GetGroundBody();
   md.bodyB = this.p1Body;
   md.target.Set(this.p1Body.GetPosition().x, this.p1Body.GetPosition().y);
-  md.collideConnected = true;
-  md.maxForce = 300.0 * this.p1Body.GetMass();
-  md.frequencyHz = 60;
-  md.dampingRatio = 0.1;
   this.p1MouseJoint = this.world.CreateJoint(md);
   this.p1Body.SetAwake(true);
 
@@ -135,10 +137,6 @@ Physics.prototype.initMouseJoints = function() {
   md.bodyA = this.world.GetGroundBody();
   md.bodyB = this.p2Body;
   md.target.Set(this.p2Body.GetPosition().x, this.p2Body.GetPosition().y);
-  md.collideConnected = true;
-  md.maxForce = 300.0 * this.p2Body.GetMass();
-  md.frequencyHz = 60;
-  md.dampingRatio = 0.1;
   this.p2MouseJoint = this.world.CreateJoint(md);
   this.p2Body.SetAwake(true);
 }
@@ -221,7 +219,13 @@ Physics.prototype.createMallet = function(x, y, size) {
 }
 
 Physics.prototype.update = function(delta) {
-  this.world.Step(delta, this.velocityIterations, this.positionIterations);
+  if (!this.lastTs) this.lastTs = Date.now();
+
+  this.delta = Date.now() - this.lastTs;
+
+  this.world.Step(this.delta / 1000, this.velocityIterations, this.positionIterations);
+
+  this.lastTs = Date.now();
 }
 
 Physics.prototype.getPositions = function() {

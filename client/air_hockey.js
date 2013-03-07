@@ -200,7 +200,7 @@ AirHockey.prototype.initSockets = function() {
     if (playerInfo) {
       that.p1View.model.set(playerInfo);
     } else {
-      that.p1View.model.set({ name: '', gravatarHash: '', score: 0 });
+      that.p1View.model.set({ name: '', gravatar: '', score: 0 });
     }
   });
 
@@ -208,7 +208,7 @@ AirHockey.prototype.initSockets = function() {
     if (playerInfo) {
       that.p2View.model.set(playerInfo);
     } else {
-      that.p2View.model.set({ name: '', gravatarHash: '', score: 0 });
+      that.p2View.model.set({ name: '', gravatar: '', score: 0 });
     }
   });
 
