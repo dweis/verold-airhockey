@@ -1,6 +1,6 @@
 var crypto = require('crypto')
   , uuid = require('node-uuid')
-  , Physics = require('./physics');
+  , Physics = require('../common/physics');
 
 function md5(string) {
   return crypto
@@ -11,7 +11,7 @@ function md5(string) {
 
 var Game = function(io) {
   this.physicsFreq = 60;
-  this.socketsFreq = 35;
+  this.socketsFreq = 20;
   this.inactivityTime = 120 * 1000;
 
   this.io = io;
@@ -61,14 +61,14 @@ Game.prototype.addPlayer = function(player) {
   } else {
     this.spectators.push(player);
     this.io.sockets.emit('spectatorAdd', { name: player.name
-                                         , gravatarHash: player.gravatarHash
+                                         , gravatar: player.gravatar
                                          , uuid: player.uuid });
   }
 }
 
 Game.prototype.spectatorRemoved = function(player) {
   this.io.sockets.emit('spectatorRemove', { name: player.name
-                                          , gravatarHash: player.gravatarHash
+                                          , gravatar: player.gravatar
                                           , uuid: player.uuid });
 }
 
@@ -160,7 +160,7 @@ Game.prototype._setPlayer = function(key, player) {
   this.resetScores();
 
   this.io.sockets.emit(key, { name: player.name
-                            , gravatarHash: player.gravatarHash
+                            , gravatar: player.gravatar
                             , uuid: player.uuid
                             , score: this[key].score });
 
@@ -210,12 +210,12 @@ Game.prototype.initSocketIO = function() {
       spectators: []
     };
 
-    if (that.p1) initialUsers.p1 = { name: that.p1.name, gravatarHash: that.p1.gravatarHash, uuid: that.p1.uuid, score: that.p1.score };
-    if (that.p2) initialUsers.p2 = { name: that.p2.name, gravatarHash: that.p2.gravatarHash, uuid: that.p2.uuid, score: that.p2.score };
+    if (that.p1) initialUsers.p1 = { name: that.p1.name, gravatar: that.p1.gravatar, uuid: that.p1.uuid, score: that.p1.score };
+    if (that.p2) initialUsers.p2 = { name: that.p2.name, gravatar: that.p2.gravatar, uuid: that.p2.uuid, score: that.p2.score };
 
     for (var i in that.spectators) {
       initialUsers.spectators.push({ name: that.spectators[i].name
-                                   , gravatarHash: that.spectators[i].gravatarHash
+                                   , gravatar: that.spectators[i].gravatar
                                    , uuid: that.spectators[i].uuid });
     }
 
@@ -224,7 +224,7 @@ Game.prototype.initSocketIO = function() {
     var player = { socket: socket, uuid: uuid.v4() };
 
     socket.on('playerRegister', function(playerInfo) {
-      player.gravatarHash = md5(playerInfo.email.trim() ||
+      player.gravatar = md5(playerInfo.email.trim() ||
           ('guest+' + Math.floor(Math.random() * 1000)) + '@airhockey.jit.su');
 
       if (!player.name) {
@@ -234,7 +234,7 @@ Game.prototype.initSocketIO = function() {
 
         socket.emit('playerRegistered', {
           name: player.name,
-          gravatarHash: player.gravatarHash,
+          gravatar: player.gravatar,
           uuid: player.uuid });
 
         that.addPlayer(player);
@@ -245,7 +245,7 @@ Game.prototype.initSocketIO = function() {
 
         that.io.sockets.emit('playerModified', {
           name: player.name,
-          gravatarHash: player.gravatarHash,
+          gravatar: player.gravatar,
           uuid: player.uuid });
       }
     });

@@ -3,6 +3,11 @@
   "version": "0.0.1-40",
   "private": true,
   "subdomain": "airhockey",
+  "author": {
+    "name": "Derrick Weis",
+    "email": "derrick@derrickweis.com",
+    "url": "http://derrickweis.com"
+  },
   "engines": {
     "node": ">=0.6"
   },

@@ -5,8 +5,8 @@ var _ = require('underscore')
   , PlayerSetupView = require('./ui/views/player_setup')
   , MenuView = require('./ui/views/menu')
   , SpectatorsCollection = require('./ui/collections/spectators')
-  , SpectatorsView = require('./ui/views/spectators');
-
+  , SpectatorsView = require('./ui/views/spectators')
+  , Physics = require('../common/physics');
 
 AirHockey = function(veroldApp) {
   this.puckEntityId = '513014602fdccc0200000565';
@@ -36,8 +36,6 @@ AirHockey = function(veroldApp) {
   this.useShadows = true;
   this.forceLowQuality = false;
   this.lowQuality = false;
-
-  this.touching = false;
 }
 
 AirHockey.prototype.setSpectatorView = function() {
@@ -130,8 +128,6 @@ AirHockey.prototype.initScene = function(scene) {
     , models = scene.getAllObjects( { "filter" :{ "model" : true }})
     , lights = scene.getAllObjects( { "filter" : { "light" : true }});
 
-    console.log(models);
-
   this.mainScene = window.mainScene = scene;
   this.assetRegistry = this.veroldApp.getAssetRegistry();
 
@@ -146,14 +142,6 @@ AirHockey.prototype.initScene = function(scene) {
   this.inputHandler = this.veroldApp.getInputHandler();
   this.renderer = this.veroldApp.getRenderer();
   this.picker = this.veroldApp.getPicker();
-
-  //Bind to input events to control the camera
-  this.veroldApp.on("keyDown", this.onKeyPress, this);
-  this.veroldApp.on("mouseUp", this.onMouseUp, this);
-  this.veroldApp.on("mouseMove", this.onMouseMove, this);
-  this.veroldApp.on("update", this.update, this );
-
-  document.addEventListener("touchmove", $.proxy(this.onTouchMove, this), true);
 
   scene.removeChildObject(lights[_.keys(lights)[1]]);
   //scene.removeChildObject(lights[_.keys(lights)[2]]);
@@ -172,6 +160,10 @@ AirHockey.prototype.initScene = function(scene) {
 
   //Tell the engine to use this camera when rendering the scene.
   this.veroldApp.setActiveCamera( this.camera );
+}
+
+AirHockey.prototype.initSockets = function() {
+  var that = this;
 
   this.socket = io.connect();
 
@@ -208,7 +200,7 @@ AirHockey.prototype.initScene = function(scene) {
     if (playerInfo) {
       that.p1View.model.set(playerInfo);
     } else {
-      that.p1View.model.set({ name: '', gravatarHash: '', score: 0 });
+      that.p1View.model.set({ name: '', gravatar: '', score: 0 });
     }
   });
 
@@ -216,7 +208,7 @@ AirHockey.prototype.initScene = function(scene) {
     if (playerInfo) {
       that.p2View.model.set(playerInfo);
     } else {
-      that.p2View.model.set({ name: '', gravatarHash: '', score: 0 });
+      that.p2View.model.set({ name: '', gravatar: '', score: 0 });
     }
   });
 
@@ -240,6 +232,21 @@ AirHockey.prototype.initScene = function(scene) {
       that.p2View.model.set('score', score[1]);
     }
   });
+
+  this.socket.on('connect', function() {
+    that.playerSetupView.show();
+  });
+}
+
+AirHockey.prototype.initInput = function() {
+  //Bind to input events to control the camera
+  this.veroldApp.on('keyDown', this.onKeyPress, this);
+  this.veroldApp.on('mouseUp', this.onMouseUp, this);
+  this.veroldApp.on('mouseMove', this.onMouseMove, this);
+  this.veroldApp.on('update', this.update, this );
+  this.veroldApp.on('fixedUpdate', this.fixedUpdate, this );
+
+  document.addEventListener("touchmove", $.proxy(this.onTouchMove, this), true);
 }
 
 AirHockey.prototype.initUI = function() {
@@ -252,24 +259,21 @@ AirHockey.prototype.initUI = function() {
 
   this.playerSetupView = new PlayerSetupView({ socket: this.socket });
   this.menuView = new MenuView({ playerSetupView: this.playerSetupView });
-
-  this.socket.on('connect', function() {
-    that.playerSetupView.show();
-  });
 }
 
 AirHockey.prototype.socketUpdate = function(updateObj) {
-  var that = this;
-  var translate = function(obj, x, y, angle) {
-    obj.threeData.position.x = (x - (that.tableWidth * 0.5)) * 0.71;
-    obj.threeData.position.z = (y - (that.tableHeight * 0.5)) * 0.71;
+  var realUpdate = _.clone(updateObj)
+    , current = this.physics.getUpdateObject();
+
+  if (this.mode == 'p1') {
+    realUpdate[6] = current[6];
+    realUpdate[7] = current[7];
+  } else if (this.mode == 'p2') {
+    realUpdate[8] = current[8];
+    realUpdate[9] = current[9];
   }
 
-  if (this.table) {
-    translate(this.puck, updateObj[0], updateObj[1]);
-    translate(this.p1Paddle, updateObj[2], updateObj[3]);
-    translate(this.p2Paddle, updateObj[4], updateObj[5]);
-  }
+  this.physics.setFromUpdateObject(realUpdate);
 }
 
 AirHockey.prototype.detectCapabilities = function() {
@@ -282,6 +286,11 @@ AirHockey.prototype.detectCapabilities = function() {
     this.forceLowQuality = true;
     this.useShadows = false;
   }
+}
+
+AirHockey.prototype.initPhysics = function() {
+  this.physics = new Physics();
+  this.physics.init();
 }
 
 AirHockey.prototype.startup = function() {
@@ -297,6 +306,9 @@ AirHockey.prototype.startup = function() {
 	this.veroldApp.loadScene( null, {
     success_hierarchy: function( scene ) {
       that.initScene(scene);
+      that.initInput();
+      that.initSockets();
+      that.initPhysics();
       that.initUI();
     },
 
@@ -308,13 +320,32 @@ AirHockey.prototype.startup = function() {
 }
 
 AirHockey.prototype.shutdown = function() {
-  this.veroldApp.off("keyDown", this.onKeyPress, this);
-  this.veroldApp.off("mouseUp", this.onMouseUp, this);
-  this.veroldApp.off("mouseMove", this.onMouseMove, this);
-  this.veroldApp.off("update", this.update, this );
+  this.veroldApp.off('keyDown', this.onKeyPress, this);
+  this.veroldApp.off('mouseUp', this.onMouseUp, this);
+  this.veroldApp.off('mouseMove', this.onMouseMove, this);
+  this.veroldApp.off('update', this.update, this );
+  this.veroldApp.off('fixedUpdate', this.fixedUpdate, this);
 }
 
 AirHockey.prototype.update = function( delta ) {
+  var that = this;
+  var translate = function(obj, x, y, angle) {
+    obj.threeData.position.x = (x - (that.tableWidth * 0.5)) * 0.71;
+    obj.threeData.position.z = (y - (that.tableHeight * 0.5)) * 0.71;
+  }
+
+  //var updateObj = this.physics.getUpdateObject();
+  var positions = this.physics.getPositions();
+
+  if (this.table) {
+    translate(this.puck, positions.puck.x, positions.puck.y);
+    translate(this.p1Paddle, positions.p1.x, positions.p1.y);
+    translate(this.p2Paddle, positions.p2.x, positions.p2.y);
+  }
+}
+
+AirHockey.prototype.fixedUpdate = function( delta ) {
+  this.physics.update(1/60);
 }
 
 AirHockey.prototype.onMouseUp = function( event ) {
@@ -351,10 +382,14 @@ AirHockey.prototype.onMouseMove = function(event) {
         pos.x -= 0.1;
         pos.y -= 0.1;
         pos.y = (pos.y <= 0) ? pos.y : 0;
+
+        this.physics.updatePositionP1(pos);
       } else {
         pos.x -= 0.1;
         pos.y += 0.1;
         pos.y = (pos.y >= 0) ? pos.y : 0;
+
+        this.physics.updatePositionP2(pos);
       }
 
       this.socket.emit('position', pos);
