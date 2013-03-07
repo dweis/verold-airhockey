@@ -262,7 +262,18 @@ AirHockey.prototype.initUI = function() {
 }
 
 AirHockey.prototype.socketUpdate = function(updateObj) {
-  this.physics.setFromUpdateObject(updateObj);
+  var realUpdate = _.clone(updateObj)
+    , current = this.physics.getUpdateObject();
+
+  if (this.mode == 'p1') {
+    realUpdate[6] = current[6];
+    realUpdate[7] = current[7];
+  } else if (this.mode == 'p2') {
+    realUpdate[8] = current[8];
+    realUpdate[9] = current[9];
+  }
+
+  this.physics.setFromUpdateObject(realUpdate);
 }
 
 AirHockey.prototype.detectCapabilities = function() {
