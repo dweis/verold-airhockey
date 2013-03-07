@@ -32,6 +32,8 @@ VeroldApp.prototype = {
       
     }
 
+    console.log("EL: ", el);
+
     var that = this;
 
 

@@ -11,7 +11,7 @@ function md5(string) {
 
 var Game = function(io) {
   this.physicsFreq = 60;
-  this.socketsFreq = 10;
+  this.socketsFreq = 30;
   this.inactivityTime = 120 * 1000;
 
   this.io = io;

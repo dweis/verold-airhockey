@@ -1,8 +1,8 @@
 {
-  "name": "verold-airhockey",
-  "version": "0.0.1-40",
+  "name": "verold-airhockey-ng",
+  "version": "0.0.1-9",
   "private": true,
-  "subdomain": "airhockey",
+  "subdomain": "airhockey-ng",
   "engines": {
     "node": ">=0.6"
   },

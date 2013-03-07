@@ -36,10 +36,6 @@ AirHockey = function(veroldApp) {
   this.useShadows = true;
   this.forceLowQuality = false;
   this.lowQuality = false;
-
-  this.touching = false;
-
-  this.physics = new Physics();
 }
 
 AirHockey.prototype.setSpectatorView = function() {
@@ -132,12 +128,8 @@ AirHockey.prototype.initScene = function(scene) {
     , models = scene.getAllObjects( { "filter" :{ "model" : true }})
     , lights = scene.getAllObjects( { "filter" : { "light" : true }});
 
-    console.log(models);
-
   this.mainScene = window.mainScene = scene;
   this.assetRegistry = this.veroldApp.getAssetRegistry();
-
-  this.physics.init();
 
   if (this.forceLowQuality) {
     this.useLowQualityMaterials();
@@ -150,15 +142,6 @@ AirHockey.prototype.initScene = function(scene) {
   this.inputHandler = this.veroldApp.getInputHandler();
   this.renderer = this.veroldApp.getRenderer();
   this.picker = this.veroldApp.getPicker();
-
-  //Bind to input events to control the camera
-  this.veroldApp.on('keyDown', this.onKeyPress, this);
-  this.veroldApp.on('mouseUp', this.onMouseUp, this);
-  this.veroldApp.on('mouseMove', this.onMouseMove, this);
-  this.veroldApp.on('update', this.update, this );
-  this.veroldApp.on('fixedUpdate', this.fixedUpdate, this );
-
-  document.addEventListener("touchmove", $.proxy(this.onTouchMove, this), true);
 
   scene.removeChildObject(lights[_.keys(lights)[1]]);
   //scene.removeChildObject(lights[_.keys(lights)[2]]);
@@ -177,6 +160,10 @@ AirHockey.prototype.initScene = function(scene) {
 
   //Tell the engine to use this camera when rendering the scene.
   this.veroldApp.setActiveCamera( this.camera );
+}
+
+AirHockey.prototype.initSockets = function() {
+  var that = this;
 
   this.socket = io.connect();
 
@@ -245,6 +232,21 @@ AirHockey.prototype.initScene = function(scene) {
       that.p2View.model.set('score', score[1]);
     }
   });
+
+  this.socket.on('connect', function() {
+    that.playerSetupView.show();
+  });
+}
+
+AirHockey.prototype.initInput = function() {
+  //Bind to input events to control the camera
+  this.veroldApp.on('keyDown', this.onKeyPress, this);
+  this.veroldApp.on('mouseUp', this.onMouseUp, this);
+  this.veroldApp.on('mouseMove', this.onMouseMove, this);
+  this.veroldApp.on('update', this.update, this );
+  this.veroldApp.on('fixedUpdate', this.fixedUpdate, this );
+
+  document.addEventListener("touchmove", $.proxy(this.onTouchMove, this), true);
 }
 
 AirHockey.prototype.initUI = function() {
@@ -257,10 +259,6 @@ AirHockey.prototype.initUI = function() {
 
   this.playerSetupView = new PlayerSetupView({ socket: this.socket });
   this.menuView = new MenuView({ playerSetupView: this.playerSetupView });
-
-  this.socket.on('connect', function() {
-    that.playerSetupView.show();
-  });
 }
 
 AirHockey.prototype.socketUpdate = function(updateObj) {
@@ -279,6 +277,11 @@ AirHockey.prototype.detectCapabilities = function() {
   }
 }
 
+AirHockey.prototype.initPhysics = function() {
+  this.physics = new Physics();
+  this.physics.init();
+}
+
 AirHockey.prototype.startup = function() {
   var that = this;
 
@@ -292,6 +295,9 @@ AirHockey.prototype.startup = function() {
 	this.veroldApp.loadScene( null, {
     success_hierarchy: function( scene ) {
       that.initScene(scene);
+      that.initInput();
+      that.initSockets();
+      that.initPhysics();
       that.initUI();
     },
 
