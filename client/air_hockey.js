@@ -312,12 +312,13 @@ AirHockey.prototype.update = function( delta ) {
     obj.threeData.position.z = (y - (that.tableHeight * 0.5)) * 0.71;
   }
 
-  var updateObj = this.physics.getUpdateObject();
+  //var updateObj = this.physics.getUpdateObject();
+  var positions = this.physics.getPositions();
 
   if (this.table) {
-    translate(this.puck, updateObj[0], updateObj[1]);
-    translate(this.p1Paddle, updateObj[2], updateObj[3]);
-    translate(this.p2Paddle, updateObj[4], updateObj[5]);
+    translate(this.puck, positions.puck.x, positions.puck.y);
+    translate(this.p1Paddle, positions.p1.x, positions.p1.y);
+    translate(this.p2Paddle, positions.p2.x, positions.p2.y);
   }
 }
 
@@ -359,10 +360,14 @@ AirHockey.prototype.onMouseMove = function(event) {
         pos.x -= 0.1;
         pos.y -= 0.1;
         pos.y = (pos.y <= 0) ? pos.y : 0;
+
+        this.physics.updatePositionP1(pos);
       } else {
         pos.x -= 0.1;
         pos.y += 0.1;
         pos.y = (pos.y >= 0) ? pos.y : 0;
+
+        this.physics.updatePositionP2(pos);
       }
 
       this.socket.emit('position', pos);

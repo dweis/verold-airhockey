@@ -43,6 +43,7 @@ Physics.prototype = new events.EventEmitter;
 
 Physics.prototype.init = function() {
   this.initPhysics();
+
   this.initContactListener();
   this.initMouseJoints();
 }
@@ -223,47 +224,31 @@ Physics.prototype.update = function(delta) {
   this.world.Step(delta, this.velocityIterations, this.positionIterations);
 }
 
+Physics.prototype.getPositions = function() {
+  return { puck: this.puckBody.GetPosition(), p1: this.p1Body.GetPosition(), p2: this.p2Body.GetPosition() };
+}
+
 Physics.prototype.getUpdateObject = function() {
   var p1 = this.puckBody.GetPosition()
-    , p2 = this.p1Body.GetPosition()
-    , p3 = this.p2Body.GetPosition()
     , lv1 = this.puckBody.GetLinearVelocity()
-    , lv2 = this.p1Body.GetLinearVelocity()
-    , lv3 = this.p2Body.GetLinearVelocity()
     , a1 = this.puckBody.GetAngle()
-    , a2 = this.p1Body.GetAngle()
-    , a3 = this.p2Body.GetAngle()
     , av1 = this.puckBody.GetAngularVelocity()
-    , av2 = this.p1Body.GetAngularVelocity()
-    , av3 = this.p2Body.GetAngularVelocity()
     , mjt1 = this.p1MouseJoint.GetTarget()
     , mjt2 = this.p2MouseJoint.GetTarget();
 
   return [
-      p1.x, p1.y, a1, lv1.x, lv1.y, av1, //  0,  1,  2,  3,  4,  5
-      p2.x, p2.y, a2, lv2.x, lv2.y, av2, //  6,  7,  8,  9, 10, 11
-      p3.x, p3.y, a3, lv3.x, lv3.y, av3, // 12, 13, 14, 15, 16, 17
-      mjt1.x, mjt1.y,                    // 18, 19
-      mjt2.x, mjt2.y                     // 20, 21
+     p1.x, p1.y, a1, lv1.x, lv1.y, av1, // 0, 1, 2, 3, 4, 5
+     mjt1.x, mjt1.y, mjt2.x, mjt2.y   // 6, 7, 8, 9
   ];
 }
 
 Physics.prototype.setFromUpdateObject = function(updateObj) {
-  var that = this;
-    that.puckBody.SetPositionAndAngle(new b2Vec2(updateObj[0], updateObj[1]), updateObj[2]);
-    that.puckBody.SetLinearVelocity(new b2Vec2(updateObj[3], updateObj[4]));
-    that.puckBody.SetAngularVelocity(updateObj[5]);
+  this.puckBody.SetPositionAndAngle(new b2Vec2(updateObj[0], updateObj[1]), updateObj[2]);
+  this.puckBody.SetLinearVelocity(new b2Vec2(updateObj[3], updateObj[4]));
+  this.puckBody.SetAngularVelocity(updateObj[5]);
 
-    that.p1Body.SetPositionAndAngle(new b2Vec2(updateObj[6], updateObj[7]), updateObj[8]);
-    that.p1Body.SetLinearVelocity(new b2Vec2(updateObj[9], updateObj[10]));
-    that.p1Body.SetAngularVelocity(updateObj[11]);
-
-    that.p2Body.SetPositionAndAngle(new b2Vec2(updateObj[12], updateObj[13]), updateObj[14]);
-    that.p2Body.SetLinearVelocity(new b2Vec2(updateObj[15], updateObj[16]));
-    that.p2Body.SetAngularVelocity(updateObj[17]);
-
-    that.p1MouseJoint.SetTarget(new b2Vec2(updateObj[18], updateObj[19]));
-    that.p2MouseJoint.SetTarget(new b2Vec2(updateObj[20], updateObj[21]));
+  this.p1MouseJoint.SetTarget(new b2Vec2(updateObj[6], updateObj[7]));
+  this.p2MouseJoint.SetTarget(new b2Vec2(updateObj[8], updateObj[9]));
 }
 
 Physics.prototype.updatePositionP1 = function(updateObj) {
