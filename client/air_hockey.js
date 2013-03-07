@@ -10,8 +10,8 @@ var _ = require('underscore')
 
 AirHockey = function(veroldApp) {
   this.puckEntityId = '513014602fdccc0200000565';
-  this.p1PaddleEntityId = '513014612fdccc0200000567';
-  this.p2PaddleEntityId = '51301584427fe90200000751';
+  this.p1PaddleEntityId = '51389aca11cbac0200000951';
+  this.p2PaddleEntityId = '5138995dc41a4a0200001923';
   this.tableEntityId = '5130146e21d650020000011b';
   this.surfaceMeshId = '5130146e21d6500200000121';
 
@@ -126,6 +126,8 @@ AirHockey.prototype.initScene = function(scene) {
   var that = this
     , models = scene.getAllObjects( { "filter" :{ "model" : true }})
     , lights = scene.getAllObjects( { "filter" : { "light" : true }});
+
+    console.log(models);
 
   this.mainScene = window.mainScene = scene;
   this.assetRegistry = this.veroldApp.getAssetRegistry();
