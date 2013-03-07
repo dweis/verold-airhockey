@@ -74,17 +74,20 @@ AirHockey.prototype.useLowQualityMaterials = function() {
 
   if (!this.lowQuality) {
     _.each(meshes, function(mesh) {
-      var materialId = mesh.getSourceObject().entityModel.get('payload').material;
-      var materialAsset = that.assetRegistry.getAsset(materialId);
-      var materialData = (materialAsset && materialAsset.entityModel.get('payload')) || {};
-      var parentObjectId = (mesh.getParentObject && mesh.getParentObject().id) || 'ground';
-      var params = {};
+      var materialId = mesh.getSourceObject().entityModel.get('payload').material
+        , materialAsset = that.assetRegistry.getAsset(materialId)
+        , materialData = (materialAsset && materialAsset.entityModel.get('payload')) || {}
+        , parentObjectId = (mesh.getParentObject && mesh.getParentObject().id) || 'ground'
+        , params = {};
 
       params.color = materialData.diffuseColor;
-      params.ambient = 0x000000;
-      //if (materialAsset.threeData.map) {
-        //params.map = materialAsset.threeData.map;
-      //}
+      params.ambient = 0x555555;
+
+      if (materialData.diffuseTexture) {
+        var textureAsset = that.assetRegistry.getAsset(materialData.diffuseTexture);
+
+        params.map = textureAsset.threeData;
+      }
 
       mesh.threeData.originalMaterial = mesh.threeData.material;
       mesh.threeData.material = new THREE.MeshLambertMaterial(params);
