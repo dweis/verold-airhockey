@@ -7,7 +7,7 @@ var express = require('express')
   , _ = require('underscore')
   , http = require('http')
   , path = require('path')
-  , Game = require('./server/game')
+  , GameServer = require('./server/game_server')
   , browserify = require('browserify')
   , browserify_middleware = require('./server/middleware/browserify')
   , httpServer, app, io;
@@ -46,6 +46,6 @@ httpServer = http.createServer(app).listen(app.get('port'), function(){
 
 io = require('socket.io').listen(httpServer, { log: false });
 
-var game = new Game(io);
+var gameServer = new GameServer(io);
 
-game.init();
+gameServer.init();

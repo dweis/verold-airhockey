@@ -34,7 +34,7 @@ var PlayerSetupView = Backbone.View.extend({
     localStorage.email = email;
     console.log('registering...')
 
-    window.airHockey.socket.emit('playerRegister', { name: name, email: email });
+    this.socket.emit('playerRegister', { name: name, email: email });
   },
 
   show: function() {

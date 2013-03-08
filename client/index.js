@@ -1,9 +1,9 @@
 var _ = require('underscore')
   , VeroldApp = require('../vendor/verold/VeroldApp')
-  , AirHockey = require('./air_hockey');
+  , GameClient = require('./game_client');
 
 var veroldApp = new VeroldApp()
-  , airHockey = new AirHockey(veroldApp);
+  , gameClient = new GameClient(veroldApp);
 
 $(function() {
   VAPI.onReady(function() {
@@ -15,10 +15,10 @@ $(function() {
       handleInput: true,
       clearColor: 0xff0000,
       success: function() {
-        airHockey.startup();
+        gameClient.startup();
       }
     });
   });
 });
 
-module.exports = window.airHockey = airHockey;
+module.exports = window.gameClient = gameClient;

@@ -2,7 +2,7 @@ var _ = require('underscore')
   , Physics = require('../common/physics')
   , UI = require('./ui');
 
-AirHockey = function(veroldApp) {
+GameClient = function(veroldApp) {
   this.puckEntityId = '513014602fdccc0200000565';
   this.p1PaddleEntityId = '51389aca11cbac0200000951';
   this.p2PaddleEntityId = '5138995dc41a4a0200001923';
@@ -32,25 +32,25 @@ AirHockey = function(veroldApp) {
   this.threeMaterials = false;
 }
 
-AirHockey.prototype.setSpectatorView = function() {
+GameClient.prototype.setSpectatorView = function() {
   this.camera.position.set( -1.0, 1.8, 0 );
   this.lookAtTable();
   this.mode = 'spectator';
 }
 
-AirHockey.prototype.setPlayer1View = function() {
+GameClient.prototype.setPlayer1View = function() {
   this.camera.position.set( 0, 1.6, -1.15 );
   this.lookAtTable();
   this.mode = 'p1';
 }
 
-AirHockey.prototype.setPlayer2View = function() {
+GameClient.prototype.setPlayer2View = function() {
   this.camera.position.set( 0, 1.6, 1.15 );
   this.lookAtTable();
   this.mode = 'p2';
 }
 
-AirHockey.prototype.lookAtTable = function() {
+GameClient.prototype.lookAtTable = function() {
   var lookAt = new THREE.Vector3();
   lookAt.add( this.table.threeData.center );
   lookAt.multiply( this.table.threeData.scale );
@@ -60,7 +60,7 @@ AirHockey.prototype.lookAtTable = function() {
   this.camera.lookAt( lookAt );
 }
 
-AirHockey.prototype.useThreeMaterials = function() {
+GameClient.prototype.useThreeMaterials = function() {
   var that = this
     , meshes = this.mainScene.getAllObjects( { "filter" : { "mesh": true }});
 
@@ -94,7 +94,7 @@ AirHockey.prototype.useThreeMaterials = function() {
   }
 }
 
-AirHockey.prototype.restoreMaterials = function() {
+GameClient.prototype.restoreMaterials = function() {
   var that = this
     , meshes = this.mainScene.getAllObjects( { "filter" : { "mesh": true }});
 
@@ -111,7 +111,7 @@ AirHockey.prototype.restoreMaterials = function() {
   }
 }
 
-AirHockey.prototype.toggleMaterials = function() {
+GameClient.prototype.toggleMaterials = function() {
   if (this.threeMaterials) {
     this.restoreMaterials();
   } else {
@@ -119,7 +119,7 @@ AirHockey.prototype.toggleMaterials = function() {
   }
 }
 
-AirHockey.prototype.initScene = function(scene) {
+GameClient.prototype.initScene = function(scene) {
   var that = this
     , models = scene.getAllObjects( { "filter" :{ "model" : true }});
 
@@ -152,7 +152,7 @@ AirHockey.prototype.initScene = function(scene) {
   this.veroldApp.setActiveCamera( this.camera );
 }
 
-AirHockey.prototype.initSockets = function() {
+GameClient.prototype.initSockets = function() {
   var that = this;
 
   this.socket = io.connect();
@@ -169,7 +169,7 @@ AirHockey.prototype.initSockets = function() {
   });
 }
 
-AirHockey.prototype.initInput = function() {
+GameClient.prototype.initInput = function() {
   //Bind to input events to control the camera
   this.veroldApp.on('keyDown', this.onKeyPress, this);
   this.veroldApp.on('mouseUp', this.onMouseUp, this);
@@ -180,13 +180,13 @@ AirHockey.prototype.initInput = function() {
   document.addEventListener("touchmove", $.proxy(this.onTouchMove, this), true);
 }
 
-AirHockey.prototype.initUI = function() {
+GameClient.prototype.initUI = function() {
   this.ui = new UI({ socket: this.socket });
 
   this.ui.init();
 }
 
-AirHockey.prototype.socketUpdate = function(updateObj) {
+GameClient.prototype.socketUpdate = function(updateObj) {
   var realUpdate = _.clone(updateObj)
     , current = this.physics.getUpdateObject();
 
@@ -201,7 +201,7 @@ AirHockey.prototype.socketUpdate = function(updateObj) {
   this.physics.setFromUpdateObject(realUpdate);
 }
 
-AirHockey.prototype.detectCapabilities = function() {
+GameClient.prototype.detectCapabilities = function() {
   var ua = navigator.userAgent.toLowerCase();
 
   if (ua.indexOf('android') >= 0) {
@@ -213,12 +213,12 @@ AirHockey.prototype.detectCapabilities = function() {
   }
 }
 
-AirHockey.prototype.initPhysics = function() {
+GameClient.prototype.initPhysics = function() {
   this.physics = new Physics();
   this.physics.init();
 }
 
-AirHockey.prototype.startup = function() {
+GameClient.prototype.startup = function() {
   var that = this;
 
   this.detectCapabilities();
@@ -244,7 +244,7 @@ AirHockey.prototype.startup = function() {
   });
 }
 
-AirHockey.prototype.shutdown = function() {
+GameClient.prototype.shutdown = function() {
   this.veroldApp.off('keyDown', this.onKeyPress, this);
   this.veroldApp.off('mouseUp', this.onMouseUp, this);
   this.veroldApp.off('mouseMove', this.onMouseMove, this);
@@ -252,7 +252,7 @@ AirHockey.prototype.shutdown = function() {
   this.veroldApp.off('fixedUpdate', this.fixedUpdate, this);
 }
 
-AirHockey.prototype.update = function( delta ) {
+GameClient.prototype.update = function( delta ) {
   var that = this;
   var translate = function(obj, x, y, angle) {
     obj.threeData.position.x = (x - (that.tableWidth * 0.5)) * 0.71;
@@ -269,11 +269,11 @@ AirHockey.prototype.update = function( delta ) {
   }
 }
 
-AirHockey.prototype.fixedUpdate = function( delta ) {
+GameClient.prototype.fixedUpdate = function( delta ) {
   this.physics.update(1/60);
 }
 
-AirHockey.prototype.onMouseUp = function( event ) {
+GameClient.prototype.onMouseUp = function( event ) {
   if ( event.button == this.inputHandler.mouseButtons[ "left" ] &&
     !this.inputHandler.mouseDragStatePrevious[ event.button ] ) {
 
@@ -289,7 +289,7 @@ AirHockey.prototype.onMouseUp = function( event ) {
   }
 }
 
-AirHockey.prototype.onMouseMove = function(event) {
+GameClient.prototype.onMouseMove = function(event) {
   if (this.mode == 'p1' || this.mode == 'p2') {
     var vector = new THREE.Vector3( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1, 0.5 );
     this.projector.unprojectVector( vector, this.camera );
@@ -322,14 +322,14 @@ AirHockey.prototype.onMouseMove = function(event) {
   }
 }
 
-AirHockey.prototype.onTouchMove = function(event){
+GameClient.prototype.onTouchMove = function(event){
   event.preventDefault();
   var touches = event.changedTouches, first = touches[0];
 
   this.onMouseMove({ clientX: first.clientX, clientY: first.clientY });
 }
 
-AirHockey.prototype.onKeyPress = function( event ) {
+GameClient.prototype.onKeyPress = function( event ) {
 	var keyCodes = this.inputHandler.keyCodes;
   if ( event.keyCode === keyCodes['B'] ) {
     var that = this;
@@ -346,4 +346,4 @@ AirHockey.prototype.onKeyPress = function( event ) {
   }
 }
 
-module.exports = AirHockey;
+module.exports = GameClient;
