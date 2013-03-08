@@ -232,10 +232,6 @@ AirHockey.prototype.initSockets = function() {
       that.p2View.model.set('score', score[1]);
     }
   });
-
-  this.socket.on('connect', function() {
-    that.playerSetupView.show();
-  });
 }
 
 AirHockey.prototype.initInput = function() {
@@ -259,6 +255,10 @@ AirHockey.prototype.initUI = function() {
 
   this.playerSetupView = new PlayerSetupView({ socket: this.socket });
   this.menuView = new MenuView({ playerSetupView: this.playerSetupView });
+
+  this.socket.on('connect', function() {
+    that.playerSetupView.show();
+  });
 }
 
 AirHockey.prototype.socketUpdate = function(updateObj) {

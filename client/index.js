@@ -1,5 +1,5 @@
 var _ = require('underscore')
-  , VeroldApp = require('./verold_app')
+  , VeroldApp = require('../vendor/verold/VeroldApp')
   , AirHockey = require('./air_hockey');
 
 var veroldApp = new VeroldApp()
