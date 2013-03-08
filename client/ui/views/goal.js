@@ -1,6 +1,6 @@
 var Backbone = require('backbone')
   , _ = require('underscore')
-  , goalTemplate = require('../templates/goal');
+  , goalTemplate = require('../templates/goal.hbs');
 
 var GoalView = Backbone.View.extend({
   template: goalTemplate,

@@ -1,7 +1,7 @@
 var Backbone = require('backbone')
   , _ = require('underscore')
-  , PlayerModel = require('../models/player')
-  , playerTemplate = require('../templates/player');
+  , PlayerModel = require('../../../common/models/player')
+  , playerTemplate = require('../templates/player.hbs');
 
 var PlayerView = Backbone.View.extend({
   template: playerTemplate,

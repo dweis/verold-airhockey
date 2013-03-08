@@ -1,10 +1,10 @@
 var _ = require('underscore')
   , GoalView = require('./ui/views/goal')
-  , PlayerModel = require('./ui/models/player')
+  , PlayerModel = require('../common/models/player')
   , PlayerView = require('./ui/views/player')
   , PlayerSetupView = require('./ui/views/player_setup')
   , MenuView = require('./ui/views/menu')
-  , SpectatorsCollection = require('./ui/collections/spectators')
+  , SpectatorsCollection = require('../common/collections/spectators')
   , SpectatorsView = require('./ui/views/spectators')
   , Physics = require('../common/physics');
 

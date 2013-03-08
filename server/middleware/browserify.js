@@ -1,4 +1,5 @@
-var browserify = require('browserify');
+var browserify = require('browserify')
+  , handleify = require('handleify');
 
 function browserify_middleware(opts, bundleCallback) {
 	var bundle, cache_time;
@@ -9,6 +10,8 @@ function browserify_middleware(opts, bundleCallback) {
 	if ( ! opts.mount) throw new Error('must provide a mount point');
 
 	bundle = browserify(opts.entry);
+
+  bundle.transform(handleify);
 
   if (typeof bundleCallback == 'function') bundleCallback(bundle);
 

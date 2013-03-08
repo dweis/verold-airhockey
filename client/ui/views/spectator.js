@@ -1,6 +1,6 @@
 var Backbone = require('backbone')
   , _ = require('underscore')
-  , spectatorTemplate = require('../templates/spectator');
+  , spectatorTemplate = require('../templates/spectator.hbs');
 
 var SpectatorView = Backbone.View.extend({
   template: spectatorTemplate,
