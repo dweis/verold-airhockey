@@ -1,6 +1,7 @@
 var _ = require('underscore')
   , Physics = require('../common/physics')
-  , UI = require('./ui');
+  , UI = require('./ui')
+  , TweenedCamera = require('./cameras/tweened');
 
 GameClient = function(veroldApp) {
   this.puckEntityId = '513014602fdccc0200000565';
@@ -11,7 +12,6 @@ GameClient = function(veroldApp) {
 
   this.veroldApp = veroldApp;
   this.mainScene = undefined;
-  this.camera = undefined;
   this.projector = new THREE.Projector();
   this.p1Paddle = undefined;
   this.p2Paddle = undefined;
@@ -30,34 +30,6 @@ GameClient = function(veroldApp) {
   this.useShadows = true;
   this.forceThreeMaterials = false;
   this.threeMaterials = false;
-}
-
-GameClient.prototype.setSpectatorView = function() {
-  this.camera.position.set( -1.0, 1.8, 0 );
-  this.lookAtTable();
-  this.mode = 'spectator';
-}
-
-GameClient.prototype.setPlayer1View = function() {
-  this.camera.position.set( 0, 1.6, -1.15 );
-  this.lookAtTable();
-  this.mode = 'p1';
-}
-
-GameClient.prototype.setPlayer2View = function() {
-  this.camera.position.set( 0, 1.6, 1.15 );
-  this.lookAtTable();
-  this.mode = 'p2';
-}
-
-GameClient.prototype.lookAtTable = function() {
-  var lookAt = new THREE.Vector3();
-  lookAt.add( this.table.threeData.center );
-  lookAt.multiply( this.table.threeData.scale );
-  lookAt.applyQuaternion( this.table.threeData.quaternion );
-  lookAt.add( this.table.threeData.position );
-
-  this.camera.lookAt( lookAt );
 }
 
 GameClient.prototype.useThreeMaterials = function() {
@@ -144,12 +116,11 @@ GameClient.prototype.initScene = function(scene) {
   this.surface = mainScene.getObject(this.surfaceMeshId);
 
   //Create the camera
-  this.camera = new THREE.PerspectiveCamera( 70, this.width / this.height, 0.1, 10000 );
-  this.camera.up.set( 0, 1, 0 );
-  this.setSpectatorView();
+  this.camera = new TweenedCamera(this.table.threeData);
+  this.camera.setSpectatorView();
 
   //Tell the engine to use this camera when rendering the scene.
-  this.veroldApp.setActiveCamera( this.camera );
+  this.veroldApp.setActiveCamera( this.camera.getCamera() );
 }
 
 GameClient.prototype.initSockets = function() {
@@ -157,20 +128,27 @@ GameClient.prototype.initSockets = function() {
 
   this.socket = io.connect();
 
-  this.socket.on('inactive', function() { alert('You have been booted due to inactivity'); });
-  this.socket.on('update', function() { that.socketUpdate.apply(that, arguments); });
+  this.socket.on('inactive', function() { 
+    that.camera.setSpectatorView();
+    that.mode = 'spectator';
+  });
+
+  this.socket.on('update', function() {
+    that.socketUpdate.apply(that, arguments); 
+  });
 
   this.socket.on('active', function(data) {
     if (data.player == 'p1') {
-      that.setPlayer1View();
+      that.camera.setPlayer1View();
+      that.mode = 'p1';
     } else if (data.player == 'p2') {
-      that.setPlayer2View();
+      that.camera.setPlayer2View();
+      that.mode = 'p2';
     }
   });
 }
 
 GameClient.prototype.initInput = function() {
-  //Bind to input events to control the camera
   this.veroldApp.on('keyDown', this.onKeyPress, this);
   this.veroldApp.on('mouseUp', this.onMouseUp, this);
   this.veroldApp.on('mouseMove', this.onMouseMove, this);
@@ -270,7 +248,8 @@ GameClient.prototype.update = function( delta ) {
 }
 
 GameClient.prototype.fixedUpdate = function( delta ) {
-  this.physics.update(1/60);
+  this.physics.update();
+  this.camera.update();
 }
 
 GameClient.prototype.onMouseUp = function( event ) {
@@ -279,7 +258,7 @@ GameClient.prototype.onMouseUp = function( event ) {
 
     var mouseX = event.sceneX / this.veroldApp.getRenderWidth();
     var mouseY = event.sceneY / this.veroldApp.getRenderHeight();
-    var pickData = this.picker.pick( this.mainScene.threeData, this.camera, mouseX, mouseY );
+    var pickData = this.picker.pick( this.mainScene.threeData, this.camera.getCamera(), mouseX, mouseY );
     if ( pickData ) {
       //Bind 'pick' event to an asset or just let user do this how they want?
       if ( pickData.meshID == "51125eb50a4925020000000f") {
@@ -292,8 +271,8 @@ GameClient.prototype.onMouseUp = function( event ) {
 GameClient.prototype.onMouseMove = function(event) {
   if (this.mode == 'p1' || this.mode == 'p2') {
     var vector = new THREE.Vector3( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1, 0.5 );
-    this.projector.unprojectVector( vector, this.camera );
-    var raycaster = new THREE.Raycaster( this.camera.position, vector.sub( this.camera.position ).normalize() );
+    this.projector.unprojectVector( vector, this.camera.getCamera() );
+    var raycaster = new THREE.Raycaster( this.camera.getCamera().position, vector.sub( this.camera.getCamera().position ).normalize() );
 
     var intersects = raycaster.intersectObjects([this.surface.threeData])
     var x, y;

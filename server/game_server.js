@@ -12,7 +12,7 @@ function md5(string) {
 var GameServer = function(io) {
   this.physicsFreq = 60;
   this.socketsFreq = 20;
-  this.inactivityTime = 120 * 1000;
+  this.inactivityTime = 20 * 1000;
 
   this.io = io;
   this.physics = new Physics();
@@ -52,6 +52,13 @@ GameServer.prototype.logStatus = function() {
     this.spectators.length, JSON.stringify(this.physics.getUpdateObject()));
 }
 
+GameServer.prototype.addSpectator = function(player) {
+    this.spectators.push(player);
+    this.io.sockets.emit('spectatorAdd', { name: player.name
+                                         , gravatar: player.gravatar
+                                         , uuid: player.uuid });
+}
+
 GameServer.prototype.addPlayer = function(player) {
   this.playing = true;
   if (!this.p1) {
@@ -59,10 +66,7 @@ GameServer.prototype.addPlayer = function(player) {
   } else if (!this.p2) {
     this.setP2(player);
   } else {
-    this.spectators.push(player);
-    this.io.sockets.emit('spectatorAdd', { name: player.name
-                                         , gravatar: player.gravatar
-                                         , uuid: player.uuid });
+    this.addSpectator(player);
   }
 }
 
@@ -168,22 +172,28 @@ GameServer.prototype._setPlayer = function(key, player) {
 }
 
 GameServer.prototype.updateSockets = function() {
-  var timestamp = Date.now(), socket;
+  var timestamp = Date.now(), socket, player;
 
   if (this.p1 && timestamp - this.p1.lastPositionUpdate > this.inactivityTime) {
     socket = this.p1.socket;
+    player = this.p1;
 
-    this.removePlayer(this.p1);
+    this.removePlayer(player);
+    this.addSpectator(player);
+
     socket.emit('inactive');
-    socket.disconnect();
   }
 
   if (this.p2 && timestamp - this.p2.lastPositionUpdate > this.inactivityTime) {
+    player = this.p1;
     socket = this.p2.socket;
+    player = this.p2;
 
-    this.removePlayer(this.p2);
+    this.removePlayer(player);
+
+    this.addSpectator(player);
+
     socket.emit('inactive');
-    socket.disconnect();
   }
 
   this.io.sockets.emit('update', this.physics.getUpdateObject());
@@ -196,7 +206,7 @@ GameServer.prototype.updatePhysics = function() {
   }
 
   if (this.playing) {
-    this.physics.update(1 / this.physicsFreq);
+    this.physics.update();
   }
 }
 
