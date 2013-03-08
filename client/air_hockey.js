@@ -206,7 +206,7 @@ AirHockey.prototype.detectCapabilities = function() {
     //this.forceLowQuality = true;
     this.useShadows = false;
   } else if (ua.match(/ipad|iphone|ipod/g)) {
-    //this.forceLowQuality = true;
+    this.forceLowQuality = true;
     this.useShadows = false;
   }
 }
