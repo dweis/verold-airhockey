@@ -119,8 +119,7 @@ AirHockey.prototype.toggleMaterials = function() {
 
 AirHockey.prototype.initScene = function(scene) {
   var that = this
-    , models = scene.getAllObjects( { "filter" :{ "model" : true }})
-    , lights = scene.getAllObjects( { "filter" : { "light" : true }});
+    , models = scene.getAllObjects( { "filter" :{ "model" : true }});
 
   this.mainScene = window.mainScene = scene;
   this.assetRegistry = this.veroldApp.getAssetRegistry();
@@ -128,7 +127,6 @@ AirHockey.prototype.initScene = function(scene) {
   if (this.forceLowQuality) {
     this.useLowQualityMaterials();
   }
-  //this.toggleMaterials();
 
   // hide progress indicator
   this.veroldApp.hideLoadingProgress();
@@ -136,10 +134,6 @@ AirHockey.prototype.initScene = function(scene) {
   this.inputHandler = this.veroldApp.getInputHandler();
   this.renderer = this.veroldApp.getRenderer();
   this.picker = this.veroldApp.getPicker();
-
-  scene.removeChildObject(lights[_.keys(lights)[1]]);
-  //scene.removeChildObject(lights[_.keys(lights)[2]]);
-  scene.removeChildObject(lights[_.keys(lights)[3]]);
 
   this.p1Paddle = models[this.p1PaddleEntityId];
   this.p2Paddle = models[this.p2PaddleEntityId];
@@ -209,10 +203,10 @@ AirHockey.prototype.detectCapabilities = function() {
   var ua = navigator.userAgent.toLowerCase();
 
   if (ua.indexOf('android') >= 0) {
-    this.forceLowQuality = true;
+    //this.forceLowQuality = true;
     this.useShadows = false;
   } else if (ua.match(/ipad|iphone|ipod/g)) {
-    this.forceLowQuality = true;
+    //this.forceLowQuality = true;
     this.useShadows = false;
   }
 }
