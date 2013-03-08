@@ -1,7 +1,7 @@
 var browserify = require('browserify')
   , handleify = require('handleify');
 
-function browserify_middleware(opts, bundleCallback) {
+function browserify_middleware(opts) {
 	var bundle, cache_time;
 	var cache = '';
 	
@@ -12,8 +12,6 @@ function browserify_middleware(opts, bundleCallback) {
 	bundle = browserify(opts.entry);
 
   bundle.transform(handleify);
-
-  if (typeof bundleCallback == 'function') bundleCallback(bundle);
 
 	opts.bundle_opts = opts.bundle_opts || {};
 

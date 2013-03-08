@@ -32,8 +32,6 @@ var browserifyMiddleware = browserify_middleware({
   mount: '/javascripts/airhockey.js',
   verbose: true,
   minify: false
-}, function(bundle) {
-  console.log(bundle);
 });
 
 app.use(browserifyMiddleware);
