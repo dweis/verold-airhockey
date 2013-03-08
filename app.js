@@ -9,7 +9,7 @@ var express = require('express')
   , path = require('path')
   , Game = require('./server/game')
   , browserify = require('browserify')
-  , browserify_express = require('browserify-express')
+  , browserify_middleware = require('./server/middleware/browserify')
   , httpServer, app, io;
 
 app = express();
@@ -26,15 +26,17 @@ app.configure(function(){
   app.use(express.static(path.join(__dirname, 'public')));
 });
 
-var bundle = browserify_express({
+var browserifyMiddleware = browserify_middleware({
   entry: __dirname + '/client/index.js',
   watch: __dirname + '/',
   mount: '/javascripts/airhockey.js',
   verbose: true,
   minify: false
+}, function(bundle) {
+  console.log(bundle);
 });
 
-app.use(bundle);
+app.use(browserifyMiddleware);
 
 app.configure('development', function(){
   app.use(express.errorHandler());
