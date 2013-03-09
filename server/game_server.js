@@ -1,7 +1,8 @@
 var PlayerModel = require('../common/models/player')
   , PlayerCollection = require('../common/collections/player')
   , uuid = require('node-uuid')
-  , Physics = require('../common/physics');
+  , Physics = require('../common/physics')
+  , _ = require('underscore');
 
 var GameServer = function(io) {
   this.physicsFreq = 60;
@@ -31,6 +32,10 @@ GameServer.prototype.init = function() {
     that.io.sockets.emit('spectatorRemove', model.toJSON());
   });
 
+  this.spectators.on('add', function(model) {
+    that.io.sockets.emit('spectatorAdd', model.toJSON());
+  });
+
   setInterval(function() {
     that.updateSockets();
   }, 1000 / this.socketsFreq);
@@ -51,47 +56,37 @@ GameServer.prototype.logStatus = function() {
     this.spectators.length, JSON.stringify(this.physics.getUpdateObject()));
 }
 
-GameServer.prototype.addSpectator = function(player) {
-    this.spectators.add(player);
-    this.io.sockets.emit('spectatorAdd', player.toJSON());
-}
-
 GameServer.prototype.addPlayer = function(player) {
   this.playing = true;
   if (!this.p1) {
-    this.setP1(player);
+    this.setPlayer('p1', player);
   } else if (!this.p2) {
-    this.setP2(player);
+    this.setPlayer('p2', player);
   } else {
-    this.addSpectator(player);
+    this.spectators.add(player);
   }
 }
 
 GameServer.prototype.removePlayer = function(player) {
-  var that = this;
+  var that = this, found = false;
 
   console.log(player.get('name') + ' has left the game');
-  if (this.p1 && this.p1.get('socket') && this.p1.get('socket').id == player.get('socket').id) {
-    this.p1.get('socket').removeListener('position', this.p1._updatePositionFn);
+  _.each(['p1', 'p2'], function(key) {
+    if (!found && that[key] && that[key].get('socket') &&
+          that[key].get('socket').id == player.get('socket').id) {
+      that[key].get('socket').removeListener('position', that[key]._updatePositionFn);
 
-    this.p1 = undefined;
+      that[key] = undefined;
 
-    if (this.spectators.length) {
-      this.setP1(this.spectators.pop());
-    } else {
-      this.io.sockets.emit('p1');
+      if (that.spectators.length) {
+        that.setPlayer(key, that.spectators.pop());
+      } else {
+        that.io.sockets.emit(key);
+      }
     }
-  } else if (this.p2 && this.p2.get('socket') && this.p2.get('socket').id == player.get('socket').id) {
-    this.p2.get('socket').removeListener('position', this.p2._updatePositionFn);
+  });
 
-    this.p2 = undefined;
-
-    if (this.spectators.length) {
-      this.setP2(this.spectators.pop());
-    } else {
-      this.io.sockets.emit('p2');
-    }
-  } else {
+  if (!found) {
     this.spectators.each(function(spectator) {
       if (spectator.get('socket').id == player.get('socket').id) {
         that.spectators.remove(spectator);
@@ -125,15 +120,7 @@ GameServer.prototype.resetScores = function() {
   this.updateScores();
 }
 
-GameServer.prototype.setP1 = function(player) {
-  this._setPlayer('p1', player);
-}
-
-GameServer.prototype.setP2 = function(player) {
-  this._setPlayer('p2', player);
-}
-
-GameServer.prototype._setPlayer = function(key, player) {
+GameServer.prototype.setPlayer = function(key, player) {
   var that = this;
 
   if (this[key]) {
@@ -160,17 +147,16 @@ GameServer.prototype._setPlayer = function(key, player) {
 }
 
 GameServer.prototype.handleInactivity = function(key) {
-  var timestamp = Date.now(), socket, player
-    , setFn = this['set' + key.toUpperCase()];
+  var timestamp = Date.now(), socket, player;
 
   if (this.spectators.length) {
     if (this[key] && timestamp - this[key].lastPositionUpdate > this.inactivityTime) {
       socket = this[key].get('socket');
       player = this[key];
 
-        setFn.call(this, this.spectators.pop());
+      this.setPlayer(key, this.spectators.pop());
 
-      this.addSpectator(player);
+      this.spectators.add(player);
 
       socket.emit('inactive');
     }
