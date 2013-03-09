@@ -1,13 +1,7 @@
-var crypto = require('crypto')
+var PlayerModel = require('../common/models/player')
+  , PlayerCollection = require('../common/collections/player')
   , uuid = require('node-uuid')
   , Physics = require('../common/physics');
-
-function md5(string) {
-  return crypto
-    .createHash('md5')
-    .update(string)
-    .digest('hex');
-}
 
 var GameServer = function(io) {
   this.physicsFreq = 60;
@@ -19,7 +13,7 @@ var GameServer = function(io) {
 
   this.playing = false;
 
-  this.spectators = [];
+  this.spectators = new PlayerCollection();
 }
 
 GameServer.prototype.init = function() {
@@ -47,16 +41,14 @@ GameServer.prototype.init = function() {
 
 GameServer.prototype.logStatus = function() {
   console.log('P1: %s (%s) P2: %s (%s) #Spectators: %s Data: %s',
-    (this.p1 && this.p1.name) || 'n/a', (this.p1 && this.p1.score) || '0',
-    (this.p2 && this.p2.score) || 'n/a', (this.p2 && this.p2.score) || '0',
+    (this.p1 && this.p1.get('name')) || 'n/a', (this.p1 && this.p1.get('score')) || '0',
+    (this.p2 && this.p2.get('score')) || 'n/a', (this.p2 && this.p2.get('score')) || '0',
     this.spectators.length, JSON.stringify(this.physics.getUpdateObject()));
 }
 
 GameServer.prototype.addSpectator = function(player) {
-    this.spectators.push(player);
-    this.io.sockets.emit('spectatorAdd', { name: player.name
-                                         , gravatar: player.gravatar
-                                         , uuid: player.uuid });
+    this.spectators.add(player);
+    this.io.sockets.emit('spectatorAdd', player.toJSON());
 }
 
 GameServer.prototype.addPlayer = function(player) {
@@ -71,15 +63,15 @@ GameServer.prototype.addPlayer = function(player) {
 }
 
 GameServer.prototype.spectatorRemoved = function(player) {
-  this.io.sockets.emit('spectatorRemove', { name: player.name
-                                          , gravatar: player.gravatar
-                                          , uuid: player.uuid });
+  this.io.sockets.emit('spectatorRemove', player.toJSON());
 }
 
 GameServer.prototype.removePlayer = function(player) {
-  console.log(player.name + ' has left the game');
-  if (this.p1 && this.p1.socket && this.p1.socket.id == player.socket.id) {
-    this.p1.socket.removeListener('position', this.p1._updatePositionFn);
+  var that = this;
+
+  console.log(player.get('name') + ' has left the game');
+  if (this.p1 && this.p1.get('socket') && this.p1.get('socket').id == player.get('socket').id) {
+    this.p1.get('socket').removeListener('position', this.p1._updatePositionFn);
 
     this.p1 = undefined;
 
@@ -90,8 +82,8 @@ GameServer.prototype.removePlayer = function(player) {
     } else {
       this.io.sockets.emit('p1');
     }
-  } else if (this.p2 && this.p2.socket && this.p2.socket.id == player.socket.id) {
-    this.p2.socket.removeListener('position', this.p2._updatePositionFn);
+  } else if (this.p2 && this.p2.get('socket') && this.p2.get('socket').id == player.get('socket').id) {
+    this.p2.get('socket').removeListener('position', this.p2._updatePositionFn);
 
     this.p2 = undefined;
 
@@ -102,12 +94,12 @@ GameServer.prototype.removePlayer = function(player) {
       this.io.sockets.emit('p2');
     }
   } else {
-    for (var i in this.spectators) {
-      if (this.spectators[i].socket.id == player.socket.id) {
-        this.spectatorRemoved(this.spectators[i]);
-        this.spectators.splice(i, 1);
+    this.spectators.each(function(spectator) {
+      if (spectator.get('socket').id == player.get('socket').id) {
+        that.spectatorRemoved(spectator);
+        that.spectators.remove(spectator);
       }
-    }
+    });
   }
 }
 
@@ -148,7 +140,7 @@ GameServer.prototype._setPlayer = function(key, player) {
   var that = this;
 
   if (this[key]) {
-    this[key].socket.removeListener('position', this[key]._updatePositionFn);
+    this[key].get('socket').removeListener('position', this[key]._updatePositionFn);
   }
 
   this[key] = player;
@@ -157,25 +149,22 @@ GameServer.prototype._setPlayer = function(key, player) {
     player.lastPositionUpdate = Date.now(); that.physics['updatePosition' + key.toUpperCase()].apply(that.physics, arguments);
   }
 
-  this[key].socket.on('position', this[key]._updatePositionFn);
-  this[key].socket.emit('active', { player: key });
+  this[key].get('socket').on('position', this[key]._updatePositionFn);
+  this[key].get('socket').emit('active', { player: key });
 
   this.physics.reset();
   this.resetScores();
 
-  this.io.sockets.emit(key, { name: player.name
-                            , gravatar: player.gravatar
-                            , uuid: player.uuid
-                            , score: this[key].score });
+  this.io.sockets.emit(key, player.toJSON());
 
-  console.log(player.name + ' has become ' + key);
+  console.log(player.get('name') + ' has become ' + key);
 }
 
 GameServer.prototype.updateSockets = function() {
   var timestamp = Date.now(), socket, player;
 
   if (this.p1 && timestamp - this.p1.lastPositionUpdate > this.inactivityTime) {
-    socket = this.p1.socket;
+    socket = this.p1.get('socket');
     player = this.p1;
 
     this.removePlayer(player);
@@ -185,8 +174,7 @@ GameServer.prototype.updateSockets = function() {
   }
 
   if (this.p2 && timestamp - this.p2.lastPositionUpdate > this.inactivityTime) {
-    player = this.p1;
-    socket = this.p2.socket;
+    socket = this.p2.get('socket');
     player = this.p2;
 
     this.removePlayer(player);
@@ -220,43 +208,31 @@ GameServer.prototype.initSocketIO = function() {
       spectators: []
     };
 
-    if (that.p1) initialUsers.p1 = { name: that.p1.name, gravatar: that.p1.gravatar, uuid: that.p1.uuid, score: that.p1.score };
-    if (that.p2) initialUsers.p2 = { name: that.p2.name, gravatar: that.p2.gravatar, uuid: that.p2.uuid, score: that.p2.score };
+    if (that.p1) initialUsers.p1 = that.p1.toJSON();
+    if (that.p2) initialUsers.p2 = that.p2.toJSON();
 
-    for (var i in that.spectators) {
-      initialUsers.spectators.push({ name: that.spectators[i].name
-                                   , gravatar: that.spectators[i].gravatar
-                                   , uuid: that.spectators[i].uuid });
-    }
+    initialUsers.spectators = that.spectators.toJSON();
 
     socket.emit('initialUsers', initialUsers);
 
-    var player = { socket: socket, uuid: uuid.v4() };
+    var player = new PlayerModel();
+
+    player.set({ socket: socket, uuid: uuid.v4() });
 
     socket.on('playerRegister', function(playerInfo) {
-      player.gravatar = md5(playerInfo.email.trim() ||
-          ('guest+' + Math.floor(Math.random() * 1000)) + '@airhockey.jit.su');
+      if (!player.get('name')) {
+        player.set(playerInfo);
 
-      if (!player.name) {
-        player.name = playerInfo.name.trim();
+        console.log('Player registered: %s', player.get('name'));
 
-        console.log('Player registered: %s', player.name);
-
-        socket.emit('playerRegistered', {
-          name: player.name,
-          gravatar: player.gravatar,
-          uuid: player.uuid });
+        socket.emit('playerRegistered', player.toJSON());
 
         that.addPlayer(player);
       } else {
-        player.name = playerInfo.name.trim();
+        player.set(playerInfo);
+        console.log('Player modified: %s', player.get('name'));
 
-        console.log('Player modified: %s', player.name);
-
-        that.io.sockets.emit('playerModified', {
-          name: player.name,
-          gravatar: player.gravatar,
-          uuid: player.uuid });
+        that.io.sockets.emit('playerModified', player.toJSON());
       }
     });
 
