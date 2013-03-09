@@ -14,6 +14,7 @@ var GameServer = function(io) {
   this.playing = false;
 
   this.spectators = new PlayerCollection();
+
 }
 
 GameServer.prototype.init = function() {
@@ -24,6 +25,10 @@ GameServer.prototype.init = function() {
 
   this.physics.on('goal', function() {
     that.goal.apply(that, arguments);
+  });
+
+  this.spectators.on('remove', function(model) {
+    that.io.sockets.emit('spectatorRemove', model.toJSON());
   });
 
   setInterval(function() {
@@ -62,10 +67,6 @@ GameServer.prototype.addPlayer = function(player) {
   }
 }
 
-GameServer.prototype.spectatorRemoved = function(player) {
-  this.io.sockets.emit('spectatorRemove', player.toJSON());
-}
-
 GameServer.prototype.removePlayer = function(player) {
   var that = this;
 
@@ -77,8 +78,6 @@ GameServer.prototype.removePlayer = function(player) {
 
     if (this.spectators.length) {
       this.setP1(this.spectators.pop());
-      this.spectatorRemoved(this.p1);
-
     } else {
       this.io.sockets.emit('p1');
     }
@@ -89,14 +88,12 @@ GameServer.prototype.removePlayer = function(player) {
 
     if (this.spectators.length) {
       this.setP2(this.spectators.pop());
-      this.spectatorRemoved(this.p2);
     } else {
       this.io.sockets.emit('p2');
     }
   } else {
     this.spectators.each(function(spectator) {
       if (spectator.get('socket').id == player.get('socket').id) {
-        that.spectatorRemoved(spectator);
         that.spectators.remove(spectator);
       }
     });
@@ -144,9 +141,11 @@ GameServer.prototype._setPlayer = function(key, player) {
   }
 
   this[key] = player;
+  this[key].lastPositionUpdate = Date.now();
 
   this[key]._updatePositionFn = function() {
-    player.lastPositionUpdate = Date.now(); that.physics['updatePosition' + key.toUpperCase()].apply(that.physics, arguments);
+    player.lastPositionUpdate = Date.now();
+    that.physics['updatePosition' + key.toUpperCase()].apply(that.physics, arguments);
   }
 
   this[key].get('socket').on('position', this[key]._updatePositionFn);
@@ -160,29 +159,27 @@ GameServer.prototype._setPlayer = function(key, player) {
   console.log(player.get('name') + ' has become ' + key);
 }
 
+GameServer.prototype.handleInactivity = function(key) {
+  var timestamp = Date.now(), socket, player
+    , setFn = this['set' + key.toUpperCase()];
+
+  if (this.spectators.length) {
+    if (this[key] && timestamp - this[key].lastPositionUpdate > this.inactivityTime) {
+      socket = this[key].get('socket');
+      player = this[key];
+
+        setFn.call(this, this.spectators.pop());
+
+      this.addSpectator(player);
+
+      socket.emit('inactive');
+    }
+  }
+}
+
 GameServer.prototype.updateSockets = function() {
-  var timestamp = Date.now(), socket, player;
-
-  if (this.p1 && timestamp - this.p1.lastPositionUpdate > this.inactivityTime) {
-    socket = this.p1.get('socket');
-    player = this.p1;
-
-    this.removePlayer(player);
-    this.addSpectator(player);
-
-    socket.emit('inactive');
-  }
-
-  if (this.p2 && timestamp - this.p2.lastPositionUpdate > this.inactivityTime) {
-    socket = this.p2.get('socket');
-    player = this.p2;
-
-    this.removePlayer(player);
-
-    this.addSpectator(player);
-
-    socket.emit('inactive');
-  }
+  this.handleInactivity('p1');
+  this.handleInactivity('p2');
 
   this.io.sockets.emit('update', this.physics.getUpdateObject());
 }
