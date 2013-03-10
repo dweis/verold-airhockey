@@ -98,6 +98,10 @@ Physics.prototype.initContactListener = function() {
     var a = contact.GetFixtureA().GetUserData()
       , b = contact.GetFixtureB().GetUserData();
 
+    if (a == 'puck' || b == 'puck') {
+      that.emit('puckContact');
+    }
+
     if (a && a == 'puck') {
       if (b && b.indexOf('net') == 0) {
         that.emit('goal', b.substring(3,4));

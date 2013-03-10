@@ -1,7 +1,8 @@
 var _ = require('underscore')
   , Physics = require('../common/physics')
   , UI = require('./ui')
-  , TweenedCamera = require('./cameras/tweened');
+  , TweenedCamera = require('./cameras/tweened')
+  , buzz = require('../vendor/buzz');
 
 GameClient = function(veroldApp) {
   this.puckEntityId = '513014602fdccc0200000565';
@@ -192,8 +193,38 @@ GameClient.prototype.detectCapabilities = function() {
 }
 
 GameClient.prototype.initPhysics = function() {
+  var that = this;
+
   this.physics = new Physics();
   this.physics.init();
+}
+
+GameClient.prototype.initAudio = function() {
+  var that = this;
+
+  this.thump = new buzz.sound('/sounds/164585__adam-n__thump-1', { formats: [ 'mp3' ] });
+  this.thump.setVolume(90);
+
+  this.fanfare = new buzz.sound('/sounds/156515__jobro__hockey-fanfare-1', { formats: [ 'mp3' ] });
+  this.fanfare.setVolume(10);
+
+  this.horn = new buzz.sound('/sounds/170825__santino-c__sirene-horn', { formats: [ 'mp3' ] });
+  this.horn.setVolume(100);
+
+  this.physics.on('puckContact', function() {
+    that.thump.stop();
+    that.thump.play();
+  });
+
+  this.socket.on('goal', function() {
+    that.horn.stop();
+    that.horn.play();
+  });
+
+  this.socket.on('active', function() {
+    that.fanfare.stop();
+    that.fanfare.play();
+  });
 }
 
 GameClient.prototype.startup = function() {
@@ -213,6 +244,7 @@ GameClient.prototype.startup = function() {
       that.initSockets();
       that.initPhysics();
       that.initUI();
+      that.initAudio();
     },
 
     progress: function(sceneObj) {
