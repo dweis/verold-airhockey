@@ -14,12 +14,20 @@ function randomEmail() {
 }
 
 var PlayerModel = Backbone.Model.extend({
+  defaults: {
+    score: 0,
+    wins: 0,
+    losses: 0
+  },
+
   toJSON: function() {
     var json = {};
 
     json.name = this.get('name');
     json.uuid = this.get('uuid');
     json.gravatar = this.get('gravatar') || md5(this.get('email') || randomEmail()) ;
+    json.wins = this.get('wins');
+    json.losses = this.get('losses');
 
     if (this.get('score')) {
       json.score = this.get('score');

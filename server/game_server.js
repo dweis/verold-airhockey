@@ -107,6 +107,16 @@ GameServer.prototype.goal = function(net) {
   this.physics.reset();
 
   this.updateScores();
+
+  if (this.p1 && this.p1.score == 3) {
+    this.io.sockets.emit('gameOver', { winner: 'p1' });
+    this.resetScores();
+    this.updateScores();
+  } else if (this.p2 && this.p2.score == 3) {
+    this.io.sockets.emit('gameOver', { winner: 'p2' });
+    this.resetScores();
+    this.updateScores();
+  }
 }
 
 GameServer.prototype.updateScores = function() {
