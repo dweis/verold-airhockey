@@ -122,6 +122,17 @@ GameClient.prototype.initScene = function(scene) {
 
   //Tell the engine to use this camera when rendering the scene.
   this.veroldApp.setActiveCamera( this.camera.getCamera() );
+
+  var material = new THREE.MeshBasicMaterial({ color: 0xcc000 });
+  var planeGeo = new THREE.PlaneGeometry( 5.0, 1.75, 1, 1 );
+  planeGeo.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
+  planeGeo.computeTangents();
+
+  this.mousePlane = new THREE.Mesh(planeGeo, material);
+  this.mousePlane.position.y = 0.81;
+  this.mousePlane.visible = false;
+
+  scene.threeData.add(this.mousePlane);
 }
 
 GameClient.prototype.initSockets = function() {
@@ -306,7 +317,7 @@ GameClient.prototype.onMouseMove = function(event) {
     this.projector.unprojectVector( vector, this.camera.getCamera() );
     var raycaster = new THREE.Raycaster( this.camera.getCamera().position, vector.sub( this.camera.getCamera().position ).normalize() );
 
-    var intersects = raycaster.intersectObjects([this.surface.threeData])
+    var intersects = raycaster.intersectObjects(/*[this.surface.threeData]*/ [this.mousePlane]);
     var x, y;
 
     if (intersects[0]) {
