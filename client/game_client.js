@@ -200,6 +200,9 @@ GameClient.prototype.detectCapabilities = function() {
   } else if (ua.match(/ipad|iphone|ipod/g)) {
     this.forceThreeMaterials = true;
     this.useShadows = false;
+  } else if (ua.match(/bb10/g)) {
+    this.forceThreeMaterials = true;
+    this.useShadows = false;
   }
 }
 
