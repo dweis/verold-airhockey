@@ -112,10 +112,12 @@ GameServer.prototype.goal = function(net) {
     this.io.sockets.emit('gameOver', { winner: 'p1' });
     this.resetScores();
     this.updateScores();
+    this.swapPlayer('p2');
   } else if (this.p2 && this.p2.score == 3) {
     this.io.sockets.emit('gameOver', { winner: 'p2' });
     this.resetScores();
     this.updateScores();
+    this.swapPlayer('p1');
   }
 }
 
@@ -156,19 +158,24 @@ GameServer.prototype.setPlayer = function(key, player) {
   console.log(player.get('name') + ' has become ' + key);
 }
 
+GameServer.prototype.swapPlayer = function(key) {
+  var player = this[key];
+
+  this.setPlayer(key, this.spectators.pop());
+
+  this.spectators.add(player);
+
+  player
+    .get('socket')
+    .emit('inactive');
+}
+
 GameServer.prototype.handleInactivity = function(key) {
-  var timestamp = Date.now(), socket, player;
+  var timestamp = Date.now();
 
   if (this.spectators.length) {
     if (this[key] && timestamp - this[key].lastPositionUpdate > this.inactivityTime) {
-      socket = this[key].get('socket');
-      player = this[key];
-
-      this.setPlayer(key, this.spectators.pop());
-
-      this.spectators.add(player);
-
-      socket.emit('inactive');
+      this.swapPlayer(key);
     }
   }
 }
