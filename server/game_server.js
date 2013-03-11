@@ -161,13 +161,15 @@ GameServer.prototype.setPlayer = function(key, player) {
 GameServer.prototype.swapPlayer = function(key) {
   var player = this[key];
 
-  this.setPlayer(key, this.spectators.pop());
+  if (player) {
+    this.setPlayer(key, this.spectators.pop());
 
-  this.spectators.add(player);
+    this.spectators.add(player);
 
-  player
-    .get('socket')
-    .emit('inactive');
+    player
+      .get('socket')
+      .emit('inactive');
+  }
 }
 
 GameServer.prototype.handleInactivity = function(key) {
