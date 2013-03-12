@@ -11,7 +11,7 @@ $(function() {
       container : null,
       projectId : "5130099e21d65002000000f6",
       enablePostProcess: false,
-      enablePicking: true,
+      enablePicking: false,
       handleInput: true,
       clearColor: 0xff0000,
       success: function() {

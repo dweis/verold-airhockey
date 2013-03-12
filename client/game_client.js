@@ -67,6 +67,38 @@ GameClient.prototype.useThreeMaterials = function() {
   }
 }
 
+GameClient.prototype.initPuckMaterial = function() {
+  console.log('initializing puck materials');
+  var puck_vs = [
+      "varying vec2 vUv;",
+      "void main() {",
+        "vUv = uv;",
+        "gl_Position = projectionMatrix * modelViewMatrix * vec4( position.xyz, 1.0 );",
+      "}",
+    ].join("\n");
+
+  var puck_fs = [
+    "varying vec2 vUv;",
+    "void main() {",
+      "gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);",
+    "}",
+  ].join("\n");
+
+  var puckMat = new THREE.ShaderMaterial( {
+    uniforms: {},
+    vertexShader: puck_vs,
+    fragmentShader: puck_fs
+  } );
+
+  this.puck.traverse(function(obj) {
+    if (obj instanceof MeshObject) {
+      obj.load({ success: function( mesh ) {
+        obj.threeData.material = puckMat;
+      }});
+    }
+  });
+}
+
 GameClient.prototype.restoreMaterials = function() {
   var that = this
     , meshes = this.mainScene.getAllObjects( { "filter" : { "mesh": true }});
@@ -133,6 +165,8 @@ GameClient.prototype.initScene = function(scene) {
   this.mousePlane.visible = false;
 
   scene.threeData.add(this.mousePlane);
+
+  this.initPuckMaterial();
 }
 
 GameClient.prototype.initSockets = function() {
@@ -162,7 +196,6 @@ GameClient.prototype.initSockets = function() {
 
 GameClient.prototype.initInput = function() {
   this.veroldApp.on('keyDown', this.onKeyPress, this);
-  this.veroldApp.on('mouseUp', this.onMouseUp, this);
   this.veroldApp.on('mouseMove', this.onMouseMove, this);
   this.veroldApp.on('update', this.update, this );
   this.veroldApp.on('fixedUpdate', this.fixedUpdate, this );
@@ -248,7 +281,6 @@ GameClient.prototype.startup = function() {
 
   this.veroldApp.getRenderer().shadowMapEnabled = this.useShadows;
 
-  //this.veroldApp.getRenderer().shadowMapEnabled = true;
   //this.veroldApp.getRenderer().shadowMapType = THREE.BasicShadowMap;
 
 	this.veroldApp.loadScene( null, {
@@ -270,7 +302,6 @@ GameClient.prototype.startup = function() {
 
 GameClient.prototype.shutdown = function() {
   this.veroldApp.off('keyDown', this.onKeyPress, this);
-  this.veroldApp.off('mouseUp', this.onMouseUp, this);
   this.veroldApp.off('mouseMove', this.onMouseMove, this);
   this.veroldApp.off('update', this.update, this );
   this.veroldApp.off('fixedUpdate', this.fixedUpdate, this);
@@ -283,7 +314,6 @@ GameClient.prototype.update = function( delta ) {
     obj.threeData.position.z = (y - (that.tableHeight * 0.5)) * 0.71;
   }
 
-  //var updateObj = this.physics.getUpdateObject();
   var positions = this.physics.getPositions();
 
   if (this.table) {
@@ -296,22 +326,6 @@ GameClient.prototype.update = function( delta ) {
 GameClient.prototype.fixedUpdate = function( delta ) {
   this.physics.update();
   this.camera.update();
-}
-
-GameClient.prototype.onMouseUp = function( event ) {
-  if ( event.button == this.inputHandler.mouseButtons[ "left" ] &&
-    !this.inputHandler.mouseDragStatePrevious[ event.button ] ) {
-
-    var mouseX = event.sceneX / this.veroldApp.getRenderWidth();
-    var mouseY = event.sceneY / this.veroldApp.getRenderHeight();
-    var pickData = this.picker.pick( this.mainScene.threeData, this.camera.getCamera(), mouseX, mouseY );
-    if ( pickData ) {
-      //Bind 'pick' event to an asset or just let user do this how they want?
-      if ( pickData.meshID == "51125eb50a4925020000000f") {
-        //Do stuff
-      }
-    }
-  }
 }
 
 GameClient.prototype.onMouseMove = function(event) {
@@ -349,6 +363,7 @@ GameClient.prototype.onMouseMove = function(event) {
 
 GameClient.prototype.onTouchMove = function(event){
   event.preventDefault();
+
   var touches = event.changedTouches, first = touches[0];
 
   this.onMouseMove({ clientX: first.clientX, clientY: first.clientY });
