@@ -127,7 +127,7 @@ Physics.prototype.initMouseJoints = function() {
   var md = new b2MouseJointDef();
   md.maxForce = 200.0 * this.p1Body.GetMass();
   md.frequencyHz = 60;
-  md.dampingRatio = 2.0;
+  md.dampingRatio = 5.0;
   md.collideConnected = true;
 
   // p1

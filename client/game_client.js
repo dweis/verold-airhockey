@@ -236,8 +236,8 @@ GameClient.prototype.initAudio = function() {
   });
 
   this.socket.on('active', function() {
-    that.fanfare.stop();
-    that.fanfare.play();
+    //that.fanfare.stop();
+    //that.fanfare.play();
   });
 }
 
