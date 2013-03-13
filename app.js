@@ -31,7 +31,17 @@ var browserifyMiddleware = browserify_middleware({
   watch: __dirname + '/',
   mount: '/javascripts/airhockey.js',
   verbose: true,
-  minify: false
+  minify: (process.env.NODE_ENV == 'production') ? true : false
+});
+
+app.use(browserifyMiddleware);
+
+browserifyMiddleware = browserify_middleware({
+  entry: __dirname + '/client/worker.js',
+  watch: __dirname + '/',
+  mount: '/javascripts/worker.js',
+  verbose: true,
+  minify: (process.env.NODE_ENV == 'production') ? true : false
 });
 
 app.use(browserifyMiddleware);

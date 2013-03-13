@@ -1,5 +1,5 @@
 var _ = require('underscore')
-  , Physics = require('../common/physics')
+  , Physics = require('./physics/physics_worker_proxy')
   , UI = require('./ui')
   , TweenedCamera = require('./cameras/tweened')
   , buzz = require('../vendor/buzz');
@@ -180,7 +180,7 @@ GameClient.prototype.initSockets = function() {
   });
 
   this.socket.on('update', function() {
-    that.socketUpdate.apply(that, arguments); 
+    that.socketUpdate.apply(that, arguments);
   });
 
   this.socket.on('active', function(data) {
@@ -220,6 +220,7 @@ GameClient.prototype.socketUpdate = function(updateObj) {
     realUpdate[8] = current[8];
     realUpdate[9] = current[9];
   }
+
 
   this.physics.setFromUpdateObject(realUpdate);
 }
@@ -316,7 +317,7 @@ GameClient.prototype.update = function( delta ) {
 
   var positions = this.physics.getPositions();
 
-  if (this.table) {
+  if (positions && this.table) {
     translate(this.puck, positions.puck.x, positions.puck.y);
     translate(this.p1Paddle, positions.p1.x, positions.p1.y);
     translate(this.p2Paddle, positions.p2.x, positions.p2.y);
@@ -324,7 +325,6 @@ GameClient.prototype.update = function( delta ) {
 }
 
 GameClient.prototype.fixedUpdate = function( delta ) {
-  this.physics.update();
   this.camera.update();
 }
 

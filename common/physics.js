@@ -51,8 +51,6 @@ Physics.prototype.init = function() {
 }
 
 Physics.prototype.initPhysics = function() {
-  console.log('Initializing physics...');
-
   this.world = new b2World(new b2Vec2(0, 0), true);
 
   this.createWall(0, 0, 0, this.height);
@@ -79,8 +77,6 @@ Physics.prototype.initPhysics = function() {
 
 Physics.prototype.reset = function() {
   var that = this;
-
-  console.log('Resetting puck and p1/p2 bodies...');
 
   // If set right away it won't work, have to use setTimeout()
   setTimeout(function() {
