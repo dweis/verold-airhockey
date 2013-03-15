@@ -65,7 +65,7 @@ VeroldApp.prototype = {
         "enablePostProcess" : options.enablePostProcess,
         "enablePicking" : options.enablePicking,
         "clearColor" : options.clearColor ? options.clearColor : 0x000000,
-        "isMobileDevice": true
+        "isMobileDevice": (/iphone|ipad|ipod|android|blackberry|bb10|mini|windows\sce|palm/i.test(navigator.userAgent.toLowerCase()))
         // "isWritable" : this.isWritable,
         // "isEmbedded" : this.isEmbedded,
       });
