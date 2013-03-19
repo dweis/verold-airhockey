@@ -14,6 +14,7 @@ $(function() {
       enablePicking: false,
       handleInput: true,
       clearColor: 0xff0000,
+      forceLowEndRendering: veroldApp.isMobile(),
       success: function() {
         gameClient.startup();
       }

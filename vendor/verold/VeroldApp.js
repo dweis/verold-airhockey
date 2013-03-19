@@ -1,11 +1,10 @@
-/*
-var $ = require('jquery');
-*/
-
 function VeroldApp( properties ) {
   this.el = undefined;
 
   this.veroldEngine = undefined;
+
+  this.isMobileDevice = (/iphone|ipad|ipod|android|blackberry|bb10|mini|windows\sce|palm/i.test(navigator.userAgent.toLowerCase()));
+
 }
 
 VeroldApp.prototype = {
@@ -31,8 +30,6 @@ VeroldApp.prototype = {
       el = $("<div>").css({ "height" : "100%", "width": "100%"}).appendTo("body");
       
     }
-
-    console.log("EL: ", el);
 
     var that = this;
 
@@ -61,13 +58,17 @@ VeroldApp.prototype = {
         "mainProgramContext" : that, 
         "mainUpdateFunction" : that.update,
         "handleInput" : options.handleInput,
-        "projectId" : options.projectId, 
+        "projectId" : options.projectId,
+        "antialias" : options.antialias,
+        "shadowMapEnabled" : options.shadowMapEnabled,
+        "shadowMapType" : options.shadowMapType,
         "enablePostProcess" : options.enablePostProcess,
         "enablePicking" : options.enablePicking,
         "clearColor" : options.clearColor ? options.clearColor : 0x000000,
-        "isMobileDevice": (/iphone|ipad|ipod|android|blackberry|bb10|mini|windows\sce|palm/i.test(navigator.userAgent.toLowerCase()))
-        // "isWritable" : this.isWritable,
-        // "isEmbedded" : this.isEmbedded,
+        "xResMultiplier" : options.xResMultiplier,
+        "yResMultiplier" : options.yResMultiplier,
+        "clearBeforeRender" : options.clearBeforeRender,
+        "forceLowEndRendering" : options.forceLowEndRendering,
       });
 
       //Call callback passed into the boiler plate
@@ -219,7 +220,7 @@ VeroldApp.prototype = {
 
   getRenderWidth: function() {
     if ( this.veroldEngine ) {
-      return this.veroldEngine.Renderer.getWidth();
+      return this.veroldEngine.Renderer.getXRes();
     }
     else {
       console.warn("VeroldApp.getRenderWidth() called before the application has been initialized. Call initialize() first.")
@@ -228,6 +229,26 @@ VeroldApp.prototype = {
   },
 
   getRenderHeight: function() {
+    if ( this.veroldEngine ) {
+      return this.veroldEngine.Renderer.getYRes();
+    }
+    else {
+      console.warn("VeroldApp.getRenderHeight() called before the application has been initialized. Call initialize() first.")
+      return null;
+    }
+  },
+
+  getWidth: function() {
+    if ( this.veroldEngine ) {
+      return this.veroldEngine.Renderer.getWidth();
+    }
+    else {
+      console.warn("VeroldApp.getRenderWidth() called before the application has been initialized. Call initialize() first.")
+      return null;
+    }
+  },
+
+  getHeight: function() {
     if ( this.veroldEngine ) {
       return this.veroldEngine.Renderer.getHeight();
     }
@@ -294,6 +315,10 @@ VeroldApp.prototype = {
     } else {
       return true;
     }
+  },
+
+  isMobile : function() {
+    return this.isMobileDevice;
   }
 }
 
