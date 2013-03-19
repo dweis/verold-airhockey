@@ -62,7 +62,9 @@ body {
 
 .player {
   width: 350px;
+  max-width: 40%;
   height: 90px;
+  max-height: 25%;
   background-color: rgba(0, 0, 0, 0.5);
   border: 3px solid rgba(128, 128, 128, 0.8);
   border-radius: 10px;
@@ -71,7 +73,7 @@ body {
 }
 
 .player .score {
-  font-size: 32px;
+  font-size: 24pt;
 }
 
 .player img {
