@@ -49,9 +49,7 @@ GameClient.prototype.useThreeMaterials = function() {
       params.ambient = 0x555555;
 
       if (materialData.diffuseTexture) {
-        var textureAsset = that.assetRegistry.getAsset(materialData.diffuseTexture);
-
-        params.map = textureAsset.threeData;
+        params.map = that.textureAsset.threeData;
       }
 
       mesh.threeData.originalMaterial = mesh.threeData.material;
@@ -129,7 +127,6 @@ GameClient.prototype.initScene = function(scene) {
     , models = scene.getAllObjects( { "filter" :{ "model" : true }});
 
   this.mainScene = window.mainScene = scene;
-  this.assetRegistry = this.veroldApp.getAssetRegistry();
 
   if (this.forceThreeMaterials) {
     this.useThreeMaterials();
@@ -229,8 +226,10 @@ GameClient.prototype.detectCapabilities = function() {
 
   if (ua.indexOf('android') >= 0) {
     //this.forceThreeMaterials = true;
+    this.forceThreeMaterials = true;
     this.useShadows = false;
   } else if (ua.match(/ipad|iphone|ipod/g)) {
+    //this.forceThreeMaterials = true;
     this.forceThreeMaterials = true;
     this.useShadows = false;
   } else if (ua.match(/bb10/g)) {
@@ -285,12 +284,18 @@ GameClient.prototype.startup = function() {
 
 	this.veroldApp.loadScene( null, {
     success_hierarchy: function( scene ) {
-      that.initScene(scene);
-      that.initInput();
-      that.initSockets();
-      that.initPhysics();
-      that.initUI();
-      that.initAudio();
+      that.assetRegistry = that.veroldApp.getAssetRegistry();
+
+      that.textureAsset = that.assetRegistry.getAsset('5130145701395c872300058a');
+
+      that.textureAsset.load({ success: function() {
+        that.initScene(scene);
+        that.initInput();
+        that.initSockets();
+        that.initPhysics();
+        that.initUI();
+        that.initAudio();
+      }});
     },
 
     progress: function(sceneObj) {
