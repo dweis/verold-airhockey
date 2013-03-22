@@ -24,6 +24,10 @@ body {
   font-size: 32px;
 }
 
+#game-ui {
+  display: none;
+}
+
 #player1 {
   position: absolute;
   left: 0px;

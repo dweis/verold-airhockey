@@ -81,6 +81,8 @@ UI.prototype.init = function() {
       that.p2View.model.set('score', score[1]);
     }
   });
+
+  $('#game-ui').show();
 }
 
 module.exports = UI;

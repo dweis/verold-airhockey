@@ -17,57 +17,59 @@
       <div>&nbsp;</div>
     </div>
   </div>
-  <div id="player1" class="player"></div>
-  <div id="player2" class="player"></div>
-  <div id="spectators"><ul></ul></div>
-  <div id="player-setup" class="dialog">
-    <a href="javascript:void(0);" class="settings-close"><i class="icon-remove"></i></a>
-    <form id="player-setup-form">
-      <label for="name">Name</label>
-      <input type="text" name="name" id="input-name"/>
-      <label for="name">Email (optional, for <a target="_new" href="http://gravatar.com">Gravatar</a> image.)</label>
-      <input type="text" name="email" id="input-email"/>
-      <input type="submit" value="Join!"/>
-    </form>
-  </div>
-  <div id="game-menu" class="menu">
-    <a title="About" href="javascript:void(0);" class="desktop about-button"><i class="icon-question-sign"></i></a>
-    <a title="Source" target="_new" href="http://github.com/gentooist/verold-airhockey" class="desktop"><i class="icon-github"></i></a>
-    <a title="Credits" href="javascript:void(0);" class="credits-button desktop"><i class="icon-beer"></i></a>
-    <a title="Settings" href="javascript:void(0);" class="settings-button"><i class="icon-cog"></i></a>
-  </div>
-  <div id="about-dialog" class="dialog">
-    <a href="javascript:void(0);" class="about-close"><i class="icon-remove"></i></a>
-    <h1>About</h1>
+  <div id="game-ui">
+    <div id="player1" class="player"></div>
+    <div id="player2" class="player"></div>
+    <div id="spectators"><ul></ul></div>
+    <div id="player-setup" class="dialog">
+      <a href="javascript:void(0);" class="settings-close"><i class="icon-remove"></i></a>
+      <form id="player-setup-form">
+        <label for="name">Name</label>
+        <input type="text" name="name" id="input-name"/>
+        <label for="name">Email (optional, for <a target="_new" href="http://gravatar.com">Gravatar</a> image.)</label>
+        <input type="text" name="email" id="input-email"/>
+        <input type="submit" value="Join!"/>
+      </form>
+    </div>
+    <div id="game-menu" class="menu">
+      <a title="About" href="javascript:void(0);" class="desktop about-button"><i class="icon-question-sign"></i></a>
+      <a title="Source" target="_new" href="http://github.com/gentooist/verold-airhockey" class="desktop"><i class="icon-github"></i></a>
+      <a title="Credits" href="javascript:void(0);" class="credits-button desktop"><i class="icon-beer"></i></a>
+      <a title="Settings" href="javascript:void(0);" class="settings-button"><i class="icon-cog"></i></a>
+    </div>
+    <div id="about-dialog" class="dialog">
+      <a href="javascript:void(0);" class="about-close"><i class="icon-remove"></i></a>
+      <h1>About</h1>
 
-    <p>
-    This is an Air hockey simulation built on top of the <a href="http://verold.com">Verold API</a>, <a href="http://github.com/mrdoob/three.js">THREE.js</a>, <a href="http://code.google.com/p/box2dweb/">Box2D</a> and <a href="http://socket.io">Socket.IO</a>.
-    </p>
-  </div>
-  <div id="credits-dialog" class="dialog">
-    <a href="javascript:void(0);" class="credits-close"><i class="icon-remove"></i></a>
-    <h1>Credits</h1>
+      <p>
+      This is an Air hockey simulation built on top of the <a href="http://verold.com">Verold API</a>, <a href="http://github.com/mrdoob/three.js">THREE.js</a>, <a href="http://code.google.com/p/box2dweb/">Box2D</a> and <a href="http://socket.io">Socket.IO</a>.
+      </p>
+    </div>
+    <div id="credits-dialog" class="dialog">
+      <a href="javascript:void(0);" class="credits-close"><i class="icon-remove"></i></a>
+      <h1>Credits</h1>
 
-    <p>
-    <strong>Programming and design:</strong> Derrick Weis
-    </p>
+      <p>
+      <strong>Programming and design:</strong> Derrick Weis
+      </p>
 
-    <p>
-    <strong>Assets:</strong>
+      <p>
+      <strong>Assets:</strong>
 
-    <ul>
-      <li>3D Model: Air Hockey Table: <a target="_new" href="http://www.turbosquid.com/3d-models/3d-max-air-hockey/430629">(turbosquid)</a></li>
-      <li>Sound: Hockey Fanfare 1 <a target="_new" href="http://www.freesound.org/people/jobro/sounds/156515/">(freesound)</a></li>
-      <li>Sound: Thump 1 <a target="_new" href="http://www.freesound.org/people/Adam_N/sounds/164585/">(freesound)</a></li>
-      <li>Sound: Sirene horn <a target="_new" href="http://www.freesound.org/people/santino_c/sounds/170825/">(freesound)</a></li>
-    </ul>
-    </p>
-  </div>
-  <div id="footer">
-    <p>Powered by <a href="http://studio.verold.com" target="_blank"><img src="images/verold_logo_white.png" class="verold-logo" /></a></p>
-  </div>
-  <div class="html5-logo">
-    <img src="images/HTML5_Badge.svg"/>
+      <ul>
+        <li>3D Model: Air Hockey Table: <a target="_new" href="http://www.turbosquid.com/3d-models/3d-max-air-hockey/430629">(turbosquid)</a></li>
+        <li>Sound: Hockey Fanfare 1 <a target="_new" href="http://www.freesound.org/people/jobro/sounds/156515/">(freesound)</a></li>
+        <li>Sound: Thump 1 <a target="_new" href="http://www.freesound.org/people/Adam_N/sounds/164585/">(freesound)</a></li>
+        <li>Sound: Sirene horn <a target="_new" href="http://www.freesound.org/people/santino_c/sounds/170825/">(freesound)</a></li>
+      </ul>
+      </p>
+    </div>
+    <div id="footer">
+      <p>Powered by <a href="http://studio.verold.com" target="_blank"><img src="images/verold_logo_white.png" class="verold-logo" /></a></p>
+    </div>
+    <div class="html5-logo">
+      <img src="images/HTML5_Badge.svg"/>
+    </div>
   </div>
   <div style="display:none;" id="webGLunsupported">
     <p>This demo requires support for webGL.<br />
