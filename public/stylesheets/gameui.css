@@ -16,7 +16,7 @@ body {
   margin-left: -60px;
   margin-top: -50px;
   color: white;
-  font-size: 72px;
+  font-size: 64pt;
   text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
 }
 
@@ -58,6 +58,7 @@ body {
 
 .player img {
   width: 64px;
+  font-size: 12pt;
 }
 
 .player {
@@ -73,7 +74,7 @@ body {
 }
 
 .player .score {
-  font-size: 24pt;
+  font-size: 18pt;
 }
 
 .player img {
@@ -96,7 +97,7 @@ body {
   background-color: rgba(0, 0, 0, 0.5);
   border: 3px solid rgba(128, 128, 128, 0.8);
   border-radius: 10px;
-  font-size: 10px;
+  font-size: 10pt;
   width: 200px;
   margin-right: 5px;
   margin-bottom: 5px;
@@ -124,7 +125,7 @@ body {
   margin-top: -115px;
   padding: 10px;
   display: none;
-  font-size: 20px;
+  font-size: 16pt;
 }
 
 #player-setup input {
@@ -134,14 +135,14 @@ body {
   margin: 5px;
   padding: 5px;
   border: 0px;
-  font-size: 18px;
+  font-size: 14pt;
 }
 
 #game-menu {
   position: absolute;
   right: 0px;
   bottom: 0px;
-  font-size: 32px;
+  font-size: 24pt;
   z-index: 2;
   padding: 15px;
 }
@@ -165,7 +166,7 @@ a {
   margin-left: -300px;
   margin-top: -200px;
   padding: 10px;
-  font-size: 20px;
+  font-size: 16pt;
   overflow-y: scroll;
 }
 
@@ -174,3 +175,18 @@ a {
   display: block;
 }
 
+@media only screen and (max-device-width: 1280px) {
+  .player {
+    width: 200px !important;
+    height: 55px !important;
+    font-size: 7pt !important;
+  }
+
+  .player img {
+    width: 32px !important;
+  }
+
+  #spectators {
+    display: none;
+  }
+}
