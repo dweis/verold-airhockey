@@ -82,6 +82,7 @@ UI.prototype.init = function() {
     }
   });
 
+  $('#headers').hide();
   $('#game-ui').show();
 }
 

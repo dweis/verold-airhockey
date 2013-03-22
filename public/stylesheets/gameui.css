@@ -194,3 +194,17 @@ a {
     display: none;
   }
 }
+
+#headers {
+  position: absolute;
+  width: 500px;
+  margin-left: -250px;
+  left: 50%;
+  text-align: center;
+  top: 30%;
+}
+
+#headers h1 {
+  font-size: 30pt;
+  color: #44ABDA;
+}

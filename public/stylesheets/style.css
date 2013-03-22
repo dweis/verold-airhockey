@@ -16,6 +16,9 @@ a {
 }
 
 #loading-progress-container {
+  width: 300px;
+  margin: 20px auto;
+  color: #44ABDA;
   position: absolute;
   top: 50%;
   left: 50%;
@@ -24,21 +27,20 @@ a {
   margin: -28px 0 0 -150px;
 }
 
-#loading-progress-container p {
-  color: #999;
+#loading-progress-container p { 
+  margin-bottom:10px;
   text-align: center;
-  font-weight: bold;
   font-size: 16px;
 }
 
 #loading-progress-container .loading-progress {
-  border: 1px solid #999;
-  height: 30px;
+  border: 1px solid #44ABDA;
+  height: 5px;
 }
 
 #loading-progress-container .loading-progress div {
   width: 1px;
-  background: #999;
+  background: #44ABDA;
   height: 100%;
 }
 
