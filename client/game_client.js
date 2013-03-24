@@ -67,20 +67,9 @@ GameClient.prototype.useThreeMaterials = function() {
 
 GameClient.prototype.initPuckMaterial = function() {
   console.log('initializing puck materials');
-  var puck_vs = [
-      "varying vec2 vUv;",
-      "void main() {",
-        "vUv = uv;",
-        "gl_Position = projectionMatrix * modelViewMatrix * vec4( position.xyz, 1.0 );",
-      "}",
-    ].join("\n");
 
-  var puck_fs = [
-    "varying vec2 vUv;",
-    "void main() {",
-      "gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);",
-    "}",
-  ].join("\n");
+  var puck_vs = require('./shaders/puck.vert')
+    , puck_fs = require('./shaders/puck.frag');
 
   var puckMat = new THREE.ShaderMaterial( {
     uniforms: {},

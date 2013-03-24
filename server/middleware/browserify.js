@@ -1,5 +1,6 @@
 var browserify = require('browserify')
-  , handleify = require('handleify');
+  , handleify = require('handleify')
+  , through = require('through');
 
 function browserify_middleware(opts) {
 	var bundle, cache_time;
@@ -12,6 +13,22 @@ function browserify_middleware(opts) {
 	bundle = browserify(opts.entry);
 
   bundle.transform(handleify);
+
+  bundle.transform(function(file) {
+    if (!/\.(vert|frag)$/.test(file)) return through();
+
+    var source = '';
+    var stream = through(
+        function write(buf) {
+          source += buf;
+        },
+        function end() {
+          this.queue('module.exports=' + JSON.stringify(source) + ';');
+          this.queue(null);
+        }
+    )
+    return stream;
+  });
 
 	opts.bundle_opts = opts.bundle_opts || {};
 
