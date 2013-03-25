@@ -236,6 +236,10 @@ Physics.prototype.getPositions = function() {
   return { puck: this.puckBody.GetPosition(), p1: this.p1Body.GetPosition(), p2: this.p2Body.GetPosition() };
 }
 
+Physics.prototype.getPuckVelocity = function() {
+  return this.puckBody.GetLinearVelocity();
+}
+
 Physics.prototype.getUpdateObject = function() {
   var p1 = this.puckBody.GetPosition()
     , lv1 = this.puckBody.GetLinearVelocity()

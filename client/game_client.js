@@ -31,6 +31,8 @@ GameClient = function(veroldApp) {
   this.useShadows = true;
   this.forceThreeMaterials = false;
   this.threeMaterials = false;
+
+  this.puckVelocity = new THREE.Vector3();
 }
 
 GameClient.prototype.useThreeMaterials = function() {
@@ -72,7 +74,9 @@ GameClient.prototype.initPuckMaterial = function() {
     , puck_fs = require('./shaders/puck.frag');
 
   var puckMat = new THREE.ShaderMaterial( {
-    uniforms: {},
+    uniforms: {
+      uVelocity: { type: 'v3', value: new THREE.Vector3(0, 0, 0) }
+    },
     vertexShader: puck_vs,
     fragmentShader: puck_fs
   } );
@@ -302,7 +306,8 @@ GameClient.prototype.shutdown = function() {
 }
 
 GameClient.prototype.update = function( delta ) {
-  var that = this;
+  var that = this
+    , puckVelocity;
   var translate = function(obj, x, y, angle) {
     obj.threeData.position.x = (x - (that.tableWidth * 0.5)) * 0.71;
     obj.threeData.position.z = (y - (that.tableHeight * 0.5)) * 0.71;
@@ -311,6 +316,15 @@ GameClient.prototype.update = function( delta ) {
   var positions = this.physics.getPositions();
 
   if (this.table) {
+    puckVelocity = this.physics.getPuckVelocity();
+    this.puckVelocity.set(puckVelocity.x, 0, puckVelocity.y);
+
+    this.puck.traverse(function(obj) {
+      if (obj instanceof MeshObject) {
+        obj.threeData.material.uniforms.uVelocity.value = that.puckVelocity;
+      }
+    });
+
     translate(this.puck, positions.puck.x, positions.puck.y);
     translate(this.p1Paddle, positions.p1.x, positions.p1.y);
     translate(this.p2Paddle, positions.p2.x, positions.p2.y);
