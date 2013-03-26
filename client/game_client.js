@@ -4,9 +4,6 @@ var _ = require('underscore')
   , TweenedCamera = require('./cameras/tweened')
   , buzz = require('../vendor/buzz');
 
-// Attaches to window.BISON
-require('bison');
-
 GameClient = function(veroldApp) {
   this.puckEntityId = '513014602fdccc0200000565';
   this.p1PaddleEntityId = '51389aca11cbac0200000951';
@@ -203,7 +200,7 @@ GameClient.prototype.initUI = function() {
 }
 
 GameClient.prototype.socketUpdate = function(updateObj) {
-  var realUpdate = window.BISON.decode(updateObj)
+  var realUpdate = _.clone(updateObj)
     , current = this.physics.getUpdateObject();
 
   if (this.mode == 'p1') {
