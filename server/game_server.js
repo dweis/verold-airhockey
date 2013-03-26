@@ -2,11 +2,12 @@ var PlayerModel = require('../common/models/player')
   , PlayerCollection = require('../common/collections/player')
   , uuid = require('node-uuid')
   , Physics = require('../common/physics')
+  , BISON = require('bison')
   , _ = require('underscore');
 
 var GameServer = function(io) {
   this.physicsFreq = 60;
-  this.socketsFreq = 20;
+  this.socketsFreq = 8;
   this.inactivityTime = 20 * 1000;
 
   this.io = io;
@@ -183,10 +184,12 @@ GameServer.prototype.handleInactivity = function(key) {
 }
 
 GameServer.prototype.updateSockets = function() {
+  var encoded = BISON.encode(this.physics.getUpdateObject());
+
   this.handleInactivity('p1');
   this.handleInactivity('p2');
 
-  this.io.sockets.emit('update', this.physics.getUpdateObject());
+  this.io.sockets.emit('update', encoded);
 }
 
 GameServer.prototype.updatePhysics = function() {

@@ -27,8 +27,8 @@ var Physics = function() {
   this.p2MouseJoint = undefined;
 
   // Constants
-  this.friction = 0.15;
-  this.density = 1;
+  this.friction = 0.1;
+  this.density = 1.0;
   this.restitution = 0.4;
   this.width = 1.25;
   this.height = 2.50;
@@ -36,8 +36,8 @@ var Physics = function() {
   this.malletDiameter = 0.095 * 2;
   this.puckDiameter = 0.048 * 2;
 
-  this.velocityIterations = 8;
-  this.positionIterations = 3;
+  this.velocityIterations = 20;
+  this.positionIterations = 8;
 }
 
 
@@ -125,7 +125,7 @@ Physics.prototype.initContactListener = function() {
 
 Physics.prototype.initMouseJoints = function() {
   var md = new b2MouseJointDef();
-  md.maxForce = 200.0 * this.p1Body.GetMass();
+  md.maxForce = 80.0 * this.p1Body.GetMass();
   md.frequencyHz = 60;
   md.dampingRatio = 5.0;
   md.collideConnected = true;
@@ -190,13 +190,15 @@ Physics.prototype.createPuck = function(x, y, size) {
 
   fixDef = new b2FixtureDef;
   fixDef.shape = new b2CircleShape(size);
-  fixDef.density = this.density;
+  fixDef.density = this.density * 3;
   fixDef.friction = this.friction;
   fixDef.restitution  = this.restitution;
 
   var body = this.world.CreateBody(bodyDef);
 
   body.CreateFixture(fixDef).SetUserData('puck');
+
+  console.log(body.GetMass());
 
   return body;
 }
@@ -216,6 +218,7 @@ Physics.prototype.createMallet = function(x, y, size) {
   fixDef.restitution  = this.restitution;
 
   body = this.world.CreateBody(bodyDef);
+  console.log(body.GetMass());
 
   body.CreateFixture(fixDef).SetUserData('mallet');
 
