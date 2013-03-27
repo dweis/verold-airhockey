@@ -33,6 +33,8 @@ GameClient = function(veroldApp) {
   this.threeMaterials = false;
 
   this.puckVelocity = new THREE.Vector3();
+
+  this.positionDirty = false;
 }
 
 GameClient.prototype.useThreeMaterials = function() {
@@ -182,6 +184,13 @@ GameClient.prototype.initSockets = function() {
       that.mode = 'p2';
     }
   });
+
+  setInterval(function() {
+    if (that.positionDirty) {
+      that.socket.emit('position', that.dirtyPosition);
+      that.positionDirty = false;
+    }
+  }, 1000/30);
 }
 
 GameClient.prototype.initInput = function() {
@@ -362,9 +371,11 @@ GameClient.prototype.onMouseMove = function(event) {
         pos.y = (pos.y >= 0) ? pos.y : 0;
 
         this.physics.updatePositionP2(pos);
+
       }
 
-      this.socket.emit('position', pos);
+      this.positionDirty = true;
+      this.dirtyPosition = pos;
     }
   }
 }

@@ -36,8 +36,8 @@ var Physics = function() {
   this.malletDiameter = 0.095 * 2;
   this.puckDiameter = 0.048 * 2;
 
-  this.velocityIterations = 8;
-  this.positionIterations = 3;
+  this.velocityIterations = 20;
+  this.positionIterations = 10;
 }
 
 
@@ -73,8 +73,8 @@ Physics.prototype.initPhysics = function() {
 
   this.puckBody = this.createPuck(this.width/2, this.height/2, this.puckDiameter/2);
 
-  this.p1Body = this.createMallet(this.width/2, this.height/8, this.malletDiameter/2);
-  this.p2Body = this.createMallet(this.width/2, this.height - this.height/8, this.malletDiameter/2);
+  this.p1Body = this.createMallet(this.width/2, this.height/8, this.malletDiameter/2, 1);
+  this.p2Body = this.createMallet(this.width/2, this.height - this.height/8, this.malletDiameter/2, 2);
 }
 
 Physics.prototype.reset = function() {
@@ -100,6 +100,10 @@ Physics.prototype.initContactListener = function() {
 
     if (a == 'puck' || b == 'puck') {
       that.emit('puckContact');
+
+      if (a.indexOf('mallet') == 0 || b.indexOf('mallet') == 0) {
+        that.emit('dirty');
+      }
     }
 
     if (a && a == 'puck') {
@@ -116,6 +120,7 @@ Physics.prototype.initContactListener = function() {
   listener.EndContact = function(contact) { }
 
   listener.PostSolve = function(contact, impulse) {
+    that.emit('dirty')
   }
 
   listener.PreSolve = function(contact, oldManifold) { }
@@ -125,9 +130,9 @@ Physics.prototype.initContactListener = function() {
 
 Physics.prototype.initMouseJoints = function() {
   var md = new b2MouseJointDef();
-  md.maxForce = 200.0 * this.p1Body.GetMass();
+  md.maxForce = 100.0 * this.p1Body.GetMass();
   md.frequencyHz = 60;
-  md.dampingRatio = 5.0;
+  md.dampingRatio = 10.0;
   md.collideConnected = true;
 
   // p1
@@ -201,7 +206,7 @@ Physics.prototype.createPuck = function(x, y, size) {
   return body;
 }
 
-Physics.prototype.createMallet = function(x, y, size) {
+Physics.prototype.createMallet = function(x, y, size, player) {
   var bodyDef, fixDef, body;
 
   bodyDef = new b2BodyDef;
@@ -217,7 +222,7 @@ Physics.prototype.createMallet = function(x, y, size) {
 
   body = this.world.CreateBody(bodyDef);
 
-  body.CreateFixture(fixDef).SetUserData('mallet');
+  body.CreateFixture(fixDef).SetUserData('mallet' + player);
 
   return body;
 }
