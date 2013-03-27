@@ -36,8 +36,8 @@ var Physics = function() {
   this.malletDiameter = 0.095 * 2;
   this.puckDiameter = 0.048 * 2;
 
-  this.velocityIterations = 20;
-  this.positionIterations = 10;
+  this.velocityIterations = 8;
+  this.positionIterations = 3;
 }
 
 

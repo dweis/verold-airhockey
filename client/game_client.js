@@ -186,6 +186,10 @@ GameClient.prototype.initSockets = function() {
   });
 
   setInterval(function() {
+    that.fixedUpdate();
+  }, 1000/60);
+
+  setInterval(function() {
     if (that.positionDirty) {
       that.socket.emit('position', that.dirtyPosition);
       that.positionDirty = false;
@@ -197,7 +201,6 @@ GameClient.prototype.initInput = function() {
   this.veroldApp.on('keyDown', this.onKeyPress, this);
   this.veroldApp.on('mouseMove', this.onMouseMove, this);
   this.veroldApp.on('update', this.update, this );
-  this.veroldApp.on('fixedUpdate', this.fixedUpdate, this );
 
   document.addEventListener("touchmove", $.proxy(this.onTouchMove, this), true);
 }
@@ -311,15 +314,25 @@ GameClient.prototype.shutdown = function() {
   this.veroldApp.off('keyDown', this.onKeyPress, this);
   this.veroldApp.off('mouseMove', this.onMouseMove, this);
   this.veroldApp.off('update', this.update, this );
-  this.veroldApp.off('fixedUpdate', this.fixedUpdate, this);
 }
 
 GameClient.prototype.update = function( delta ) {
   var that = this
     , puckVelocity;
-  var translate = function(obj, x, y, angle) {
-    obj.threeData.position.x = (x - (that.tableWidth * 0.5)) * 0.71;
-    obj.threeData.position.z = (y - (that.tableHeight * 0.5)) * 0.71;
+
+  var lerp = function(p0, p1, u) {
+    return p0 + (p1 - p0) * u;
+  }
+
+  var translate = function(obj, x, y, interpolate) {
+    var newX = interpolate ? lerp(obj.lastX || 0, x, 0.66) : x
+      , newY = interpolate ? lerp(obj.lastY || 0, y, 0.66) : y;
+
+    obj.threeData.position.x = (newX - (that.tableWidth * 0.5)) * 0.71;
+    obj.threeData.position.z = (newY - (that.tableHeight * 0.5)) * 0.71;
+
+    obj.lastX = newX;
+    obj.lastY = newY;
   }
 
   var positions = this.physics.getPositions();
@@ -334,15 +347,16 @@ GameClient.prototype.update = function( delta ) {
       }
     });
 
-    translate(this.puck, positions.puck.x, positions.puck.y);
-    translate(this.p1Paddle, positions.p1.x, positions.p1.y);
-    translate(this.p2Paddle, positions.p2.x, positions.p2.y);
+    translate(this.puck, positions.puck.x, positions.puck.y, true);
+    translate(this.p1Paddle, positions.p1.x, positions.p1.y, this.mode == 'p1' ? false : true);
+    translate(this.p2Paddle, positions.p2.x, positions.p2.y, this.mode == 'p2' ? false : true);
   }
+
+  if (this.camera) this.camera.update();
 }
 
-GameClient.prototype.fixedUpdate = function( delta ) {
+GameClient.prototype.fixedUpdate = function() {
   this.physics.update();
-  this.camera.update();
 }
 
 GameClient.prototype.onMouseMove = function(event) {
