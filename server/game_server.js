@@ -6,7 +6,7 @@ var PlayerModel = require('../common/models/player')
 
 var GameServer = function(io) {
   this.physicsFreq = 60;
-  this.socketsFreq = 20;
+  this.socketsFreq = 1;
   this.inactivityTime = 20 * 1000;
 
   this.io = io;
@@ -15,7 +15,6 @@ var GameServer = function(io) {
   this.playing = false;
 
   this.spectators = new PlayerCollection();
-
 }
 
 GameServer.prototype.init = function() {
@@ -26,6 +25,10 @@ GameServer.prototype.init = function() {
 
   this.physics.on('goal', function() {
     that.goal.apply(that, arguments);
+  });
+
+  this.physics.on('dirty', function() {
+    that.updateSockets();
   });
 
   this.spectators.on('remove', function(model) {
@@ -161,7 +164,7 @@ GameServer.prototype.setPlayer = function(key, player) {
 GameServer.prototype.swapPlayer = function(key) {
   var player = this[key];
 
-  if (player) {
+  if (player && this.spectators.length) {
     this.setPlayer(key, this.spectators.pop());
 
     this.spectators.add(player);
