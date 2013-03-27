@@ -164,7 +164,7 @@ GameServer.prototype.setPlayer = function(key, player) {
 GameServer.prototype.swapPlayer = function(key) {
   var player = this[key];
 
-  if (player) {
+  if (player && this.spectators.length) {
     this.setPlayer(key, this.spectators.pop());
 
     this.spectators.add(player);

@@ -100,10 +100,6 @@ Physics.prototype.initContactListener = function() {
 
     if (a == 'puck' || b == 'puck') {
       that.emit('puckContact');
-
-      if (a.indexOf('mallet') == 0 || b.indexOf('mallet') == 0) {
-        that.emit('dirty');
-      }
     }
 
     if (a && a == 'puck') {
@@ -117,10 +113,11 @@ Physics.prototype.initContactListener = function() {
     }
   }
 
-  listener.EndContact = function(contact) { }
+  listener.EndContact = function(contact) {
+    that.emit('dirty')
+  }
 
   listener.PostSolve = function(contact, impulse) {
-    that.emit('dirty')
   }
 
   listener.PreSolve = function(contact, oldManifold) { }
