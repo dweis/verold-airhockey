@@ -320,19 +320,9 @@ GameClient.prototype.update = function( delta ) {
   var that = this
     , puckVelocity;
 
-  var lerp = function(p0, p1, u) {
-    return p0 + (p1 - p0) * u;
-  }
-
   var translate = function(obj, x, y, interpolate) {
-    var newX = interpolate ? lerp(obj.lastX || 0, x, 0.66) : x
-      , newY = interpolate ? lerp(obj.lastY || 0, y, 0.66) : y;
-
-    obj.threeData.position.x = (newX - (that.tableWidth * 0.5)) * 0.71;
-    obj.threeData.position.z = (newY - (that.tableHeight * 0.5)) * 0.71;
-
-    obj.lastX = newX;
-    obj.lastY = newY;
+    obj.threeData.position.x = (x - (that.tableWidth * 0.5)) * 0.71;
+    obj.threeData.position.z = (y - (that.tableHeight * 0.5)) * 0.71;
   }
 
   var positions = this.physics.getPositions();

@@ -6,7 +6,7 @@ var PlayerModel = require('../common/models/player')
 
 var GameServer = function(io) {
   this.physicsFreq = 60;
-  this.socketsFreq = 1;
+  this.socketsFreq = 10;
   this.inactivityTime = 20 * 1000;
 
   this.io = io;
@@ -186,10 +186,12 @@ GameServer.prototype.handleInactivity = function(key) {
 }
 
 GameServer.prototype.updateSockets = function() {
+  var updateObj = this.physics.getUpdateObject();
+
   this.handleInactivity('p1');
   this.handleInactivity('p2');
 
-  this.io.sockets.emit('update', this.physics.getUpdateObject());
+  this.io.sockets.emit('update', updateObj);
 }
 
 GameServer.prototype.updatePhysics = function() {

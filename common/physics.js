@@ -25,6 +25,9 @@ var Physics = function() {
   this.p1MouseJoint = undefined;
   this.p2Body = undefined;
   this.p2MouseJoint = undefined;
+  this.tracePuckBody = undefined;
+  this.tracePuckMouseJoint = undefined;
+  this.frame = 0;
 
   // Constants
   this.friction = 0.15;
@@ -72,6 +75,7 @@ Physics.prototype.initPhysics = function() {
   this.createNet(this.width/3 + this.width/6, this.height + 0.05, this.width/6, this.thickness*2, 2);
 
   this.puckBody = this.createPuck(this.width/2, this.height/2, this.puckDiameter/2);
+  this.tracePuckBody = this.createTracePuck(this.width/2, this.height/2, this.puckDiameter/2);
 
   this.p1Body = this.createMallet(this.width/2, this.height/8, this.malletDiameter/2, 1);
   this.p2Body = this.createMallet(this.width/2, this.height - this.height/8, this.malletDiameter/2, 2);
@@ -79,6 +83,8 @@ Physics.prototype.initPhysics = function() {
 
 Physics.prototype.reset = function() {
   var that = this;
+
+  this.frame = 0;
 
   console.log('Resetting puck and p1/p2 bodies...');
 
@@ -145,6 +151,17 @@ Physics.prototype.initMouseJoints = function() {
   md.target.Set(this.p2Body.GetPosition().x, this.p2Body.GetPosition().y);
   this.p2MouseJoint = this.world.CreateJoint(md);
   this.p2Body.SetAwake(true);
+
+  // tracepuck
+  md.bodyA = this.world.GetGroundBody();
+  md.bodyB = this.tracePuckBody;
+  md.target.Set(this.puckBody.GetPosition().x, this.puckBody.GetPosition().y);
+  md.maxForce = 50.0 * this.p1Body.GetMass();
+  md.frequencyHz = 60;
+  md.dampingRatio = 5.0;
+  md.collideConnected = false;
+  this.tracePuckMouseJoint = this.world.CreateJoint(md);
+  this.tracePuckBody.SetAwake(true);
 }
 
 Physics.prototype.createWall = function(x1, y1, x2, y2) {
@@ -196,6 +213,31 @@ Physics.prototype.createPuck = function(x, y, size) {
   fixDef.friction = this.friction;
   fixDef.restitution  = this.restitution;
 
+  if (process.env.NODE_ENV == 'undefined') 
+    fixDef.filter.maskBits = 0x000000;
+
+  var body = this.world.CreateBody(bodyDef);
+
+  body.CreateFixture(fixDef).SetUserData('puck');
+
+  return body;
+}
+
+Physics.prototype.createTracePuck = function(x, y, size) {
+  var bodyDef, fixDef, body;
+
+  bodyDef = new b2BodyDef;
+  bodyDef.type = b2Body.b2_dynamicBody;
+  bodyDef.position.x = x;
+  bodyDef.position.y = y;
+
+  fixDef = new b2FixtureDef;
+  fixDef.shape = new b2CircleShape(size);
+  fixDef.density = this.density;
+  fixDef.friction = this.friction;
+  fixDef.restitution  = this.restitution;
+  fixDef.filter.maskBits = 0x000000;
+
   var body = this.world.CreateBody(bodyDef);
 
   body.CreateFixture(fixDef).SetUserData('puck');
@@ -229,13 +271,17 @@ Physics.prototype.update = function(delta) {
 
   this.delta = Date.now() - this.lastTs;
 
+  this.tracePuckMouseJoint.SetTarget({ x: this.puckBody.GetPosition().x, y: this.puckBody.GetPosition().y });
+
   this.world.Step(this.delta / 1000, this.velocityIterations, this.positionIterations);
 
   this.lastTs = Date.now();
+
+  this.frame ++;
 }
 
 Physics.prototype.getPositions = function() {
-  return { puck: this.puckBody.GetPosition(), p1: this.p1Body.GetPosition(), p2: this.p2Body.GetPosition() };
+  return { puck: this.tracePuckBody.GetPosition(), p1: this.p1Body.GetPosition(), p2: this.p2Body.GetPosition() };
 }
 
 Physics.prototype.getPuckVelocity = function() {
