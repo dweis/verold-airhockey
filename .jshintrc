@@ -1,0 +1,29 @@
+{
+  "browser": true,
+  "curly": true,
+  "eqeqeq": true,
+  "es5": true,
+  "forin": true,
+  "indent": 2,
+  "undef": true,
+  "laxcomma": true,
+  "latedef": true,
+  "newcap": true,
+  "unused": true,
+  "predef": [
+    "__dirname",
+    "define",
+    "module",
+    "require",
+    "requirejs",
+    "process",
+    "console",
+    "THREE",
+    "VeroldApp",
+    "VAPI",
+    "SkinnedMeshObject",
+    "MeshObject",
+    "it",
+    "describe"
+  ]
+}
