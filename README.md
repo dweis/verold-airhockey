@@ -5,7 +5,7 @@
   [Socket.IO](http://socket.io).
 
   You can play this game live at:
-  [http://airhockey.jit.su](http://airhockey.jit.su)
+  [http://airhockey.verold.com](http://airhockey.verold.com)
 
 ## Installation
 
