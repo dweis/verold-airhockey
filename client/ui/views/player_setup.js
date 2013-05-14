@@ -1,12 +1,14 @@
-var Backbone = require('backbone')
-  , _ = require('underscore');
+// globals alert, console
+
+var Backbone = require('backbone'),
+    $ = require('jquery-browser');
 
 var PlayerSetupView = Backbone.View.extend({
   el: '#player-setup',
 
   initialize: function(options) {
-    var name = localStorage.name || 'Guest' + Math.floor(Math.random() * 1000)
-      , email = localStorage.email || '';
+    var name = localStorage.name || 'Guest' + Math.floor(Math.random() * 1000),
+        email = localStorage.email || '';
 
     this.socket = options.socket;
 
@@ -23,8 +25,8 @@ var PlayerSetupView = Backbone.View.extend({
   save: function(e) {
     e.preventDefault();
 
-    var name = $('#input-name').val()
-      , email = $('#input-email').val();
+    var name = $('#input-name').val(),
+        email = $('#input-email').val();
 
     if (!name.length) {
       return alert('invalid name!');
@@ -32,7 +34,7 @@ var PlayerSetupView = Backbone.View.extend({
 
     localStorage.name = name;
     localStorage.email = email;
-    console.log('registering...')
+    console.log('registering...');
 
     this.socket.emit('playerRegister', { name: name, email: email });
   },

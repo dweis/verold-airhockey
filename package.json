@@ -24,7 +24,8 @@
     "underscore": "1.4.4",
     "handleify": "0.1.1",
     "tween": "0.8.0",
-    "through": "2.2.2"
+    "through": "2.2.2",
+    "jquery-browser": "2.0.0-1"
   },
   "devDependencies": {
     "grunt": "~0.4.1",

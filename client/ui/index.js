@@ -1,14 +1,16 @@
- var GoalView = require('./views/goal')
-  , PlayerModel = require('../../common/models/player')
-  , PlayerView = require('./views/player')
-  , PlayerSetupView = require('./views/player_setup')
-  , MenuView = require('./views/menu')
-  , PlayerCollection = require('../../common/collections/player')
-  , SpectatorsView = require('./views/spectators');
+var _ = require('underscore'),
+    $ = require('jquery-browser'),
+    GoalView = require('./views/goal'),
+    PlayerModel = require('../../common/models/player'),
+    PlayerView = require('./views/player'),
+    PlayerSetupView = require('./views/player_setup'),
+    MenuView = require('./views/menu'),
+    PlayerCollection = require('../../common/collections/player'),
+    SpectatorsView = require('./views/spectators');
 
 var UI = function(options) {
   this.socket = options.socket;
-}
+};
 
 UI.prototype.init = function() {
   var that = this;
@@ -25,8 +27,8 @@ UI.prototype.init = function() {
     that.playerSetupView.show();
   });
 
-  this.socket.on('goal', function(net) { 
-    var goalView = new GoalView({ model: (net == 1) ? that.p2View.model : that.p1View.model });
+  this.socket.on('goal', function(net) {
+    var goalView = new GoalView({ model: (net === 1) ? that.p2View.model : that.p1View.model });
 
     setTimeout(function() {
       goalView.remove();
@@ -67,23 +69,23 @@ UI.prototype.init = function() {
 
   this.socket.on('spectatorRemove', function(playerInfo) {
     _.each(that.spectators.models,function(model) {
-      if (model.get('uuid') == playerInfo.uuid) {
+      if (model.get('uuid') === playerInfo.uuid) {
         that.spectators.remove(model);
       }
     });
   });
 
   this.socket.on('score', function(score) {
-    if (score[0] != that.p1View.model.get('score')) {
+    if (score[0] !== that.p1View.model.get('score')) {
       that.p1View.model.set('score', score[0]);
     }
-    if (score[1] != that.p2View.model.get('score')) {
+    if (score[1] !== that.p2View.model.get('score')) {
       that.p2View.model.set('score', score[1]);
     }
   });
 
   $('#headers').hide();
   $('#game-ui').show();
-}
+};
 
 module.exports = UI;

@@ -1,21 +1,31 @@
-var browserify = require('browserify')
-  , handleify = require('handleify')
-  , through = require('through');
+var browserify = require('browserify'),
+    handleify = require('handleify'),
+    through = require('through');
 
 function browserify_middleware(opts) {
 	var bundle, cache_time;
 	var cache = '';
-	
-	if (typeof opts !== 'object') throw new Error('opts must be an object');
-	if ( ! opts.entry) throw new Error('must provide an entry point');
-	if ( ! opts.mount) throw new Error('must provide a mount point');
+
+	if (typeof opts !== 'object') {
+    throw new Error('opts must be an object');
+  }
+
+	if (!opts.entry) {
+    throw new Error('must provide an entry point');
+  }
+
+	if (!opts.mount) {
+    throw new Error('must provide a mount point');
+  }
 
 	bundle = browserify(opts.entry);
 
   bundle.transform(handleify);
 
   bundle.transform(function(file) {
-    if (!/\.(vert|frag)$/.test(file)) return through();
+    if (!/\.(vert|frag)$/.test(file)) {
+      return through();
+    }
 
     var source = '';
     var stream = through(
@@ -26,7 +36,7 @@ function browserify_middleware(opts) {
           this.queue('module.exports=' + JSON.stringify(source) + ';');
           this.queue(null);
         }
-    )
+    );
     return stream;
   });
 

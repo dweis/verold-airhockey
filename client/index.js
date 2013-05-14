@@ -1,8 +1,9 @@
 var VeroldApp = require('../vendor/verold/VeroldApp'),
+    $ = require('jquery-browser'),
     GameClient = require('./game_client');
 
-var veroldApp = new VeroldApp()
-  , gameClient = new GameClient(veroldApp);
+var veroldApp = new VeroldApp(),
+    gameClient = new GameClient(veroldApp);
 
 $(function() {
   VAPI.onReady(function() {

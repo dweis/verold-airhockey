@@ -1,5 +1,5 @@
-var Backbone = require('backbone')
-  , _ = require('underscore');
+var Backbone = require('backbone'),
+    $ = require('jquery-browser');
 
 var MenuView = Backbone.View.extend({
   el: 'body',

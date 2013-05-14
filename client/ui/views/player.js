@@ -1,14 +1,12 @@
-var Backbone = require('backbone')
-  , _ = require('underscore')
-  , PlayerModel = require('../../../common/models/player')
-  , playerTemplate = require('../templates/player.hbs');
+var Backbone = require('backbone'),
+    $ = require('jquery-browser'),
+    PlayerModel = require('../../../common/models/player'),
+    playerTemplate = require('../templates/player.hbs');
 
 var PlayerView = Backbone.View.extend({
   template: playerTemplate,
 
   initialize: function(options) {
-    var that = this;
-
     this.model = new PlayerModel();
     this.socket = options.socket;
 
@@ -32,7 +30,7 @@ var PlayerView = Backbone.View.extend({
   },
 
   playerModified: function(playerInfo) {
-    if (this.model && this.model.get('uuid') == playerInfo.uuid) {
+    if (this.model && this.model.get('uuid') === playerInfo.uuid) {
       this.model.set(playerInfo);
     }
   }

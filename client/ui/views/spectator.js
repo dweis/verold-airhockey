@@ -1,6 +1,6 @@
-var Backbone = require('backbone')
-  , _ = require('underscore')
-  , spectatorTemplate = require('../templates/spectator.hbs');
+var Backbone = require('backbone'),
+    $ = require('jquery-browser'),
+    spectatorTemplate = require('../templates/spectator.hbs');
 
 var SpectatorView = Backbone.View.extend({
   template: spectatorTemplate,
@@ -27,7 +27,7 @@ var SpectatorView = Backbone.View.extend({
   },
 
   playerModified: function(playerInfo) {
-    if (this.model && this.model.get('uuid') == playerInfo.uuid) {
+    if (this.model && this.model.get('uuid') === playerInfo.uuid) {
       this.model.set(playerInfo);
     }
   }

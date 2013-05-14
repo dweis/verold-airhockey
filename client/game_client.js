@@ -3,7 +3,7 @@ var _ = require('underscore'),
     UI = require('./ui'),
     TweenedCamera = require('./cameras/tweened'),
     buzz = require('../vendor/buzz'),
-    $ = require('jquery');
+    $ = require('jquery-browser');
 
 var GameClient = window.VAPI.VeroldApp.extend({
   initialize: function() {
