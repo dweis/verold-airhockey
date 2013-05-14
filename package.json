@@ -1,8 +1,8 @@
 {
-  "name": "verold-airhockey-ng",
+  "name": "verold-airhockey",
   "version": "0.1.0-43",
   "private": true,
-  "subdomain": "airhockey-ng",
+  "subdomain": "airhockey",
   "author": {
     "name": "Derrick Weis",
     "email": "derrick@derrickweis.com",
