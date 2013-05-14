@@ -1,5 +1,4 @@
 var Backbone = require('backbone'),
-    $ = require('jquery-browser'),
     spectatorTemplate = require('../templates/spectator.hbs');
 
 var SpectatorView = Backbone.View.extend({

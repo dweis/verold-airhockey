@@ -9,6 +9,7 @@
   "latedef": true,
   "newcap": true,
   "unused": true,
+  "jquery": true,
   "predef": [
     "__dirname",
     "define",

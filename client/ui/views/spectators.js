@@ -1,5 +1,4 @@
 var Backbone = require('backbone'),
-    $ = require('jquery-browser'),
     SpectatorView = require('./spectator');
 
 var SpectatorsView = Backbone.View.extend({
@@ -13,6 +12,7 @@ var SpectatorsView = Backbone.View.extend({
 
   spectatorAdded: function(model) {
     var view = new SpectatorView({ model: model, socket: this.socket });
+
     view.render();
     model.view = view;
 

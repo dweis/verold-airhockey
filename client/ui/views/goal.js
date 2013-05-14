@@ -1,5 +1,4 @@
 var Backbone = require('backbone'),
-    $ = require('jquery-browser'),
     goalTemplate = require('../templates/goal.hbs');
 
 var GoalView = Backbone.View.extend({

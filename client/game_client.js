@@ -2,8 +2,7 @@ var _ = require('underscore'),
     Physics = require('../common/physics'),
     UI = require('./ui'),
     TweenedCamera = require('./cameras/tweened'),
-    buzz = require('../vendor/buzz'),
-    $ = require('jquery-browser');
+    buzz = require('../vendor/buzz');
 
 var GameClient = window.VAPI.VeroldApp.extend({
   initialize: function() {
@@ -45,7 +44,7 @@ var GameClient = window.VAPI.VeroldApp.extend({
     if (!this.threeMaterials) {
       _.each(meshes, function(mesh) {
         var materialId = mesh.entityModel.get('payload').material || mesh.getSourceObject().entityModel.get('payload').material,
-            materialAsset = that.assetRegistry.getAsset(materialId),
+            materialAsset = that.getAssetRegistry().getAsset(materialId),
             materialData = (materialAsset && materialAsset.entityModel.get('payload')) || {},
             params = {};
 
@@ -93,7 +92,7 @@ var GameClient = window.VAPI.VeroldApp.extend({
   },
 
   restoreMaterials: function() {
-    var meshes = this.mainScene.getAllObjects( { "filter" : { "mesh": true }});
+    var meshes = this.mainScene.getAllObjects( { 'filter' : { 'mesh': true }});
 
     if (!this.forceThreeMaterials && this.threeMaterials) {
       _.each(meshes, function(mesh) {
@@ -117,7 +116,7 @@ var GameClient = window.VAPI.VeroldApp.extend({
   },
 
   initScene: function(scene) {
-    var models = scene.getAllObjects( { "filter" :{ "model" : true }});
+    var models = scene.getAllObjects( { 'filter' :{ 'model' : true }});
 
     this.mainScene = scene;
 
@@ -126,11 +125,11 @@ var GameClient = window.VAPI.VeroldApp.extend({
     }
 
     // hide progress indicator
-    this.veroldApp.hideLoadingProgress();
+    //this.hideLoadingProgress();
 
-    this.inputHandler = this.veroldApp.getInputHandler();
-    this.renderer = this.veroldApp.getRenderer();
-    this.picker = this.veroldApp.getPicker();
+    this.inputHandler = this.getInputHandler();
+    this.renderer = this.getRenderer();
+    this.picker = this.getPicker();
 
     this.p1Paddle = models[this.p1PaddleEntityId];
     this.p2Paddle = models[this.p2PaddleEntityId];
@@ -143,7 +142,7 @@ var GameClient = window.VAPI.VeroldApp.extend({
     this.camera.setSpectatorView();
 
     //Tell the engine to use this camera when rendering the scene.
-    this.veroldApp.setActiveCamera( this.camera.getCamera() );
+    this.setActiveCamera( this.camera.getCamera() );
 
     var material = new THREE.MeshBasicMaterial({ color: 0xcc000 });
     var planeGeo = new THREE.PlaneGeometry( 5.0, 1.75, 1, 1 );
@@ -196,11 +195,13 @@ var GameClient = window.VAPI.VeroldApp.extend({
   },
 
   initInput: function() {
-    this.veroldApp.on('keyDown', this.onKeyPress, this);
-    this.veroldApp.on('mouseMove', this.onMouseMove, this);
-    this.veroldApp.on('update', this.update, this );
+    this.veroldEngine.on('keyDown', this.onKeyPress, this);
+    this.veroldEngine.on('mouseMove', this.onMouseMove, this);
+    this.veroldEngine.on('update', this.update, this );
 
-    document.addEventListener('touchmove', $.proxy(this.onTouchMove, this), true);
+    document.addEventListener('touchmove', function() {
+      this.onTouchMove.apply(this, arguments);
+    });
   },
 
   initUI: function() {
@@ -274,42 +275,29 @@ var GameClient = window.VAPI.VeroldApp.extend({
     });
   },
 
-  startup: function() {
-    var that = this;
-
+  defaultSceneLoaded: function(scene) {
+    this.textureAsset = this.getAssetRegistry().getAsset('5130145701395c872300058a');
+    this.textureAsset.load();
     this.detectCapabilities();
+    this.getRenderer().shadowMapEnabled = this.useShadows;
+    //this.getRenderer().shadowMapType = THREE.BasicShadowMap;
+    this.initScene(scene);
+    this.initInput();
+    this.initSockets();
+    this.initPhysics();
+    this.initUI();
+    this.initAudio();
+  },
 
-    this.veroldApp.getRenderer().shadowMapEnabled = this.useShadows;
-
-    //this.veroldApp.getRenderer().shadowMapType = THREE.BasicShadowMap;
-
-    this.veroldApp.loadScene( null, {
-      success_hierarchy: function( scene ) {
-        that.assetRegistry = that.veroldApp.getAssetRegistry();
-
-        that.textureAsset = that.assetRegistry.getAsset('5130145701395c872300058a');
-
-        that.textureAsset.load({ success: function() {
-          that.initScene(scene);
-          that.initInput();
-          that.initSockets();
-          that.initPhysics();
-          that.initUI();
-          that.initAudio();
-        }});
-      },
-
-      progress: function(sceneObj) {
-        var percent = Math.floor((sceneObj.loadingProgress.loaded_hierarchy / sceneObj.loadingProgress.total_hierarchy)*100);
-        that.veroldApp.setLoadingProgress(percent);
-      }
-    });
+  defaultSceneProgress: function(scene) {
+    var percent = Math.floor((scene.loadingProgress.loaded_hierarchy / scene.loadingProgress.total_hierarchy)*100);
+    $('#loading-progress-container .loading-progress div').css({ width: percent + '%' });
   },
 
   shutdown: function() {
-    this.veroldApp.off('keyDown', this.onKeyPress, this);
-    this.veroldApp.off('mouseMove', this.onMouseMove, this);
-    this.veroldApp.off('update', this.update, this );
+    this.veroldEngine.off('keyDown', this.onKeyPress, this);
+    this.veroldEngine.off('mouseMove', this.onMouseMove, this);
+    this.veroldEngine.off('update', this.update, this );
   },
 
   translateObj: function(obj, x, y) {
@@ -397,7 +385,7 @@ var GameClient = window.VAPI.VeroldApp.extend({
     if (event.keyCode === keyCodes.B) {
       var that = this;
       this.boundingBoxesOn = !this.boundingBoxesOn;
-      var scene = this.veroldApp.getActiveScene();
+      var scene = this.getActiveScene();
 
       scene.traverse( function( obj ) {
         if ( obj.isBB ) {

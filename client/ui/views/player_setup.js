@@ -1,18 +1,20 @@
 // globals alert, console
 
-var Backbone = require('backbone'),
-    $ = require('jquery-browser');
+var Backbone = require('backbone');
 
 var PlayerSetupView = Backbone.View.extend({
   el: '#player-setup',
 
   initialize: function(options) {
-    var name = localStorage.name || 'Guest' + Math.floor(Math.random() * 1000),
+    var that = this,
+        name = localStorage.name || 'Guest' + Math.floor(Math.random() * 1000),
         email = localStorage.email || '';
 
     this.socket = options.socket;
 
-    this.socket.on('playerRegistered', $.proxy(this.onRegistered, this));
+    this.socket.on('playerRegistered', function() {
+      that.onRegistered.apply(that, arguments);
+    });
 
     $('#input-name').val(name);
     $('#input-email').val(email);

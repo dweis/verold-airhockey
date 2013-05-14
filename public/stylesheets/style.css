@@ -1,6 +1,7 @@
 body {
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
   background: #000;
+  overflow: hidden;
 }
 
 body, html, canvas {
@@ -15,6 +16,14 @@ a {
   color: #00B7FF;
 }
 
+#render-target-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
 #loading-progress-container {
   width: 300px;
   margin: 20px auto;
@@ -27,7 +36,7 @@ a {
   margin: -28px 0 0 -150px;
 }
 
-#loading-progress-container p { 
+#loading-progress-container p {
   margin-bottom:10px;
   text-align: center;
   font-size: 16px;
@@ -110,3 +119,7 @@ a {
   }
 }
 
+#render-target-container {
+  width: 100%;
+  height: 100%;
+}

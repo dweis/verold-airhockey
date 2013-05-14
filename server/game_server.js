@@ -6,7 +6,7 @@ var PlayerModel = require('../common/models/player'),
 
 var GameServer = function(io) {
   this.physicsFreq = 60;
-  this.socketsFreq = 10;
+  this.socketsFreq = 15;
   this.inactivityTime = 20 * 1000;
 
   this.io = io;

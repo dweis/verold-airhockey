@@ -1,5 +1,4 @@
 var _ = require('underscore'),
-    $ = require('jquery-browser'),
     GoalView = require('./views/goal'),
     PlayerModel = require('../../common/models/player'),
     PlayerView = require('./views/player'),

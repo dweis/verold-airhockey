@@ -1,5 +1,4 @@
 var Backbone = require('backbone'),
-    $ = require('jquery-browser'),
     PlayerModel = require('../../../common/models/player'),
     playerTemplate = require('../templates/player.hbs');
 
@@ -7,12 +6,16 @@ var PlayerView = Backbone.View.extend({
   template: playerTemplate,
 
   initialize: function(options) {
+    var that = this;
+
     this.model = new PlayerModel();
     this.socket = options.socket;
 
     this.model.on('change', this.render, this);
 
-    this.socket.on('playerModified', $.proxy(this.playerModified, this));
+    this.socket.on('playerModified', function() {
+      that.playerModified.apply(that, arguments);
+    });
   },
 
   render: function() {

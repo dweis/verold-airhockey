@@ -13,8 +13,8 @@ module.exports = function(grunt) {
 
     regarde: {
       js: {
-        files: [ 'app/**/*.js', '!app/vendor/**/*.js', 'test/**/*.js' ],
-        tasks: [ 'jshint', 'cafemocha', 'express-server', 'livereload' ]
+        files: [ 'client/**/*.js', 'server/**/*.js', 'common/**/*.js' ],
+        tasks: [ 'express-server', 'livereload' ]
       }
     },
 

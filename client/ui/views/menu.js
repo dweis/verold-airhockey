@@ -1,5 +1,4 @@
-var Backbone = require('backbone'),
-    $ = require('jquery-browser');
+var Backbone = require('backbone');
 
 var MenuView = Backbone.View.extend({
   el: 'body',
