@@ -44,6 +44,17 @@ module.exports = function(grunt) {
         ],
         dest: 'public/javascripts/client/'
       }
+    },
+
+    rsync: {
+      production: {
+        src: '.',
+        dest: '/nodeapps/verold-airhockey/',
+        host: 'node@airhockey.nodeapp.net',
+        recursive: true,
+        exclude: [ 'node_modules', '.git' ],
+        delete: true
+      }
     }
   });
 
@@ -53,6 +64,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-cafe-mocha');
   grunt.loadNpmTasks('grunt-express-server');
   grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-rsync');
 
   grunt.registerTask('default', [ 'jshint', 'cafemocha' ]);
   grunt.registerTask('server', [ 'livereload-start', 'express-server', 'regarde'  ]);
