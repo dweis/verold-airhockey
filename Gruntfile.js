@@ -27,6 +27,17 @@ module.exports = function(grunt) {
         exclude: [ 'node_modules', '.git' ],
         delete: true
       }
+    },
+
+    sshexec: {
+      restart: {
+        command: 'sudo service verold-airhockey restart',
+        options: {
+          host: 'nodeapp.net',
+          username: 'node',
+          privateKey: grunt.file.read(require('path').join(process.env.HOME, '.ssh', 'id_dsa'))
+        }
+      }
     }
   });
 
@@ -35,8 +46,10 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-express-server');
   grunt.loadNpmTasks('grunt-rsync');
+  grunt.loadNpmTasks('grunt-ssh');
 
   grunt.registerTask('default', [ 'jshint' ]);
   grunt.registerTask('server', [ 'livereload-start', 'express-server', 'regarde'  ]);
   grunt.registerTask('watch',  [ 'jshint', 'livereload-start', 'regarde' ]);
+  grunt.registerTask('deploy', [ 'rsync:production', 'sshexec:restart' ]);
 };
