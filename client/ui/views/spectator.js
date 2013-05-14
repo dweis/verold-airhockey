@@ -16,7 +16,7 @@ var SpectatorView = Backbone.View.extend({
   },
 
   close: function() {
-    this.socket.removeListener('playerModified', this._playerModified, this);
+    this.socket.removeListener('playerModified', this._playerModified);
     this.unbind();
     this.remove();
   },

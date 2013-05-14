@@ -6,15 +6,12 @@ var PlayerSetupView = Backbone.View.extend({
   el: '#player-setup',
 
   initialize: function(options) {
-    var that = this,
-        name = localStorage.name || 'Guest' + Math.floor(Math.random() * 1000),
+    var name = localStorage.name || 'Guest' + Math.floor(Math.random() * 1000),
         email = localStorage.email || '';
 
     this.socket = options.socket;
 
-    this.socket.on('playerRegistered', function() {
-      that.onRegistered.apply(that, arguments);
-    });
+    this.socket.on('playerRegistered', $.proxy(this.onRegistered, this));
 
     $('#input-name').val(name);
     $('#input-email').val(email);

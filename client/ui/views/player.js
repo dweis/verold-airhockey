@@ -13,9 +13,7 @@ var PlayerView = Backbone.View.extend({
 
     this.model.on('change', this.render, this);
 
-    this.socket.on('playerModified', function() {
-      that.playerModified.apply(that, arguments);
-    });
+    this.socket.on('playerModified', $.bind(that.playerModified, that));
   },
 
   render: function() {
@@ -33,6 +31,7 @@ var PlayerView = Backbone.View.extend({
   },
 
   playerModified: function(playerInfo) {
+    console.log('modified:', playerInfo);
     if (this.model && this.model.get('uuid') === playerInfo.uuid) {
       this.model.set(playerInfo);
     }

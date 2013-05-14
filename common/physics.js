@@ -105,11 +105,11 @@ Physics.prototype.initContactListener = function() {
 
     if (a && a === 'puck') {
       if (b && b.indexOf('net') === 0) {
-        that.emit('goal', b.substring(3,4));
+        that.emit('goal', parseInt(b.substring(3,4), 10));
       }
     } else if (b && b === 'puck') {
       if (a && a.indexOf('net') === 0) {
-        that.emit('goal', a.substring(3,4));
+        that.emit('goal', parseInt(a.substring(3,4), 10));
       }
     }
   };
