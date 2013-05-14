@@ -50,7 +50,7 @@ module.exports = function(grunt) {
       production: {
         src: '.',
         dest: '/nodeapps/verold-airhockey/',
-        host: 'node@airhockey.nodeapp.net',
+        host: 'node@nodeapp.net',
         recursive: true,
         exclude: [ 'node_modules', '.git' ],
         delete: true
