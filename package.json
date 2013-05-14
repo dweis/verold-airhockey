@@ -31,10 +31,8 @@
     "grunt-contrib-livereload": "~0.1.2",
     "grunt-regarde": "~0.1.1",
     "grunt-contrib-jshint": "~0.4.3",
-    "grunt-cafe-mocha": "~0.1.1",
     "grunt-cli": "~0.1.7",
     "grunt-express-server": "~0.1.0",
-    "grunt-contrib-copy": "~0.4.1",
     "grunt-rsync": "~0.1.1"
   }
 }

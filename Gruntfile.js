@@ -18,34 +18,6 @@ module.exports = function(grunt) {
       }
     },
 
-    cafemocha: {
-      all: {
-        src: 'test/**.test.js',
-        options: {
-          ui: 'bdd',
-          reporter: 'nyan',
-          bail: false,
-          require: [
-          ],
-          globals: [
-            'uuid'
-          ]
-        },
-      }
-    },
-
-    copy: {
-      requirejs: {
-        expand: true,
-        cwd: 'build/client/',
-        src: [
-          'site.js',
-          'depths.js'
-        ],
-        dest: 'public/javascripts/client/'
-      }
-    },
-
     rsync: {
       production: {
         src: '.',
@@ -61,12 +33,10 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-regarde');
   grunt.loadNpmTasks('grunt-contrib-livereload');
   grunt.loadNpmTasks('grunt-contrib-jshint');
-  grunt.loadNpmTasks('grunt-cafe-mocha');
   grunt.loadNpmTasks('grunt-express-server');
-  grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-rsync');
 
-  grunt.registerTask('default', [ 'jshint', 'cafemocha' ]);
+  grunt.registerTask('default', [ 'jshint' ]);
   grunt.registerTask('server', [ 'livereload-start', 'express-server', 'regarde'  ]);
-  grunt.registerTask('watch',  [ 'jshint', 'cafemocha', 'livereload-start', 'regarde' ]);
+  grunt.registerTask('watch',  [ 'jshint', 'livereload-start', 'regarde' ]);
 };
