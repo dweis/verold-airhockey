@@ -1,4 +1,3 @@
-//var TWEEN = require('../../vendor/Tween');
 var TWEEN = require('tween');
 
 var TweenedCamera = function(targetObj) {
@@ -13,28 +12,28 @@ var TweenedCamera = function(targetObj) {
   this.lookAt.multiply(targetObj.scale);
   this.lookAt.applyQuaternion(targetObj.quaternion);
   this.lookAt.add(targetObj.position);
-}
+};
 
 TweenedCamera.prototype.getCamera = function() {
   return this.camera;
-}
+};
 
 TweenedCamera.prototype.setSpectatorView = function() {
   this.tweenTo({ x: -1.0, y: 1.8, z: 0 });
-}
+};
 
 TweenedCamera.prototype.setPlayer1View = function() {
   this.tweenTo({ x: 0, y: 1.5, z: -1.25 });
-}
+};
 
 TweenedCamera.prototype.setPlayer2View = function() {
   this.tweenTo({ x: 0, y: 1.5, z: 1.25 });
-}
+};
 
 TweenedCamera.prototype.tweenTo = function(position) {
-  var that = this
-    , to = { x: position.x * 1000, y: position.y * 1000, z: position.z * 1000 }
-    , from = { x: this.camera.position.x * 1000, y: this.camera.position.y * 1000, z: this.camera.position.z * 1000 };
+  var that = this,
+      to = { x: position.x * 1000, y: position.y * 1000, z: position.z * 1000 },
+      from = { x: this.camera.position.x * 1000, y: this.camera.position.y * 1000, z: this.camera.position.z * 1000 };
 
   var tween = new TWEEN.Tween(from)
     .to(to, 1500)
@@ -46,12 +45,12 @@ TweenedCamera.prototype.tweenTo = function(position) {
     .start();
 
   this.tween = tween;
-}
+};
 
 TweenedCamera.prototype.update = function() {
   if (this.tween) {
     TWEEN.update();
   }
-}
+};
 
 module.exports = TweenedCamera;

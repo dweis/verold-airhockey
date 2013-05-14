@@ -1,6 +1,5 @@
-var _ = require('underscore')
-  , VeroldApp = require('../vendor/verold/VeroldApp')
-  , GameClient = require('./game_client');
+var VeroldApp = require('../vendor/verold/VeroldApp'),
+    GameClient = require('./game_client');
 
 var veroldApp = new VeroldApp()
   , gameClient = new GameClient(veroldApp);

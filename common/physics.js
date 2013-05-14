@@ -1,5 +1,5 @@
-var events = require('events')
-  , Box2D = require('box2dweb-commonjs').Box2D
+var events = require('events'),
+    Box2D = require('box2dweb-commonjs').Box2D
   , b2Vec2 = Box2D.Common.Math.b2Vec2
   , b2AABB = Box2D.Collision.b2AABB
   , b2BodyDef = Box2D.Dynamics.b2BodyDef
@@ -63,7 +63,7 @@ Physics.prototype.initPhysics = function() {
 
   this.createWall(0, 0, this.width/3, 0);
   this.createWall(this.width/12, 0, 0, this.height / 24);
-  this.createWall(this.width - this.width/3, 0, this.width, 0); 
+  this.createWall(this.width - this.width/3, 0, this.width, 0);
   this.createWall(this.width - this.width/12, 0, this.width, this.height / 24);
 
   this.createWall(0, this.height, this.width/3, this.height);
@@ -213,7 +213,7 @@ Physics.prototype.createPuck = function(x, y, size) {
   fixDef.friction = this.friction;
   fixDef.restitution  = this.restitution;
 
-  if (process.env.NODE_ENV == 'undefined') 
+  if (process.env.NODE_ENV == 'undefined')
     fixDef.filter.maskBits = 0x000000;
 
   var body = this.world.CreateBody(bodyDef);

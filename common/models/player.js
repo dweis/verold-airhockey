@@ -1,6 +1,5 @@
-var crypto = require('crypto')
-  , Backbone = require('backbone')
-  , _ = require('underscore');
+var crypto = require('crypto'),
+    Backbone = require('backbone');
 
 function md5(string) {
   return crypto
