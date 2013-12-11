@@ -5,38 +5,6 @@ var _ = require('underscore'),
     buzz = require('../vendor/buzz');
 
 var GameClient = window.VAPI.VeroldApp.extend({
-  initialize: function() {
-    this.puckEntityId = '513014602fdccc0200000565';
-    this.p1PaddleEntityId = '51389aca11cbac0200000951';
-    this.p2PaddleEntityId = '5138995dc41a4a0200001923';
-    this.tableEntityId = '5130146e21d650020000011b';
-    this.surfaceMeshId = '5130146e21d6500200000121';
-
-    this.mainScene = undefined;
-    this.projector = new THREE.Projector();
-    this.p1Paddle = undefined;
-    this.p2Paddle = undefined;
-    this.puck = undefined;
-    this.table = undefined;
-    this.surface = undefined;
-
-    this.width = window.innerWidth;
-    this.height = window.innerHeight;
-
-    this.tableWidth = 1.25;
-    this.tableHeight = 2.5;
-
-    this.mode = 'spectator';
-
-    this.useShadows = true;
-    this.forceThreeMaterials = false;
-    this.threeMaterials = false;
-
-    this.puckVelocity = new THREE.Vector3();
-
-    this.positionDirty = false;
-  },
-
   useThreeMaterials: function() {
     var that = this,
         meshes = this.mainScene.getAllObjects( { "filter" : { "mesh": true }});
@@ -69,6 +37,7 @@ var GameClient = window.VAPI.VeroldApp.extend({
   },
 
   initPuckMaterial: function() {
+    /*
     console.log('initializing puck materials');
 
     var puck_vs = require('./shaders/puck.vert'),
@@ -83,12 +52,13 @@ var GameClient = window.VAPI.VeroldApp.extend({
     } );
 
     this.puck.traverse(function(obj) {
-      if (obj instanceof MeshObject) {
+      if (obj instanceof VAPI.StaticMeshObject) {
         obj.load({ success: function(mesh) {
           mesh.threeData.material = puckMat;
         }});
       }
     });
+    */
   },
 
   restoreMaterials: function() {
@@ -127,7 +97,7 @@ var GameClient = window.VAPI.VeroldApp.extend({
     // hide progress indicator
     //this.hideLoadingProgress();
 
-    this.inputHandler = this.getInputHandler();
+    this.inputHandler = this.getInput();
     this.renderer = this.getRenderer();
     this.picker = this.getPicker();
 
@@ -141,8 +111,10 @@ var GameClient = window.VAPI.VeroldApp.extend({
     this.camera = new TweenedCamera(this.table.threeData);
     this.camera.setSpectatorView();
 
+    this.threeCamera = this.camera.getCamera();
+
     //Tell the engine to use this camera when rendering the scene.
-    this.setActiveCamera( this.camera.getCamera() );
+    //this.setActiveCamera( this.camera.getCamera() );
 
     var material = new THREE.MeshBasicMaterial({ color: 0xcc000 });
     var planeGeo = new THREE.PlaneGeometry( 5.0, 1.75, 1, 1 );
@@ -156,6 +128,8 @@ var GameClient = window.VAPI.VeroldApp.extend({
     scene.threeData.add(this.mousePlane);
 
     this.initPuckMaterial();
+
+    this.threeScene = scene.threeData;
   },
 
   initSockets: function() {
@@ -276,10 +250,40 @@ var GameClient = window.VAPI.VeroldApp.extend({
   },
 
   defaultSceneLoaded: function(scene) {
+    this.puckEntityId = '513014602fdccc0200000565';
+    this.p1PaddleEntityId = '51389aca11cbac0200000951';
+    this.p2PaddleEntityId = '5138995dc41a4a0200001923';
+    this.tableEntityId = '5130146e21d650020000011b';
+    this.surfaceMeshId = '5130146e21d6500200000121';
+
+    this.mainScene = undefined;
+    this.projector = new THREE.Projector();
+    this.p1Paddle = undefined;
+    this.p2Paddle = undefined;
+    this.puck = undefined;
+    this.table = undefined;
+    this.surface = undefined;
+
+    this.width = window.innerWidth;
+    this.height = window.innerHeight;
+
+    this.tableWidth = 1.25;
+    this.tableHeight = 2.5;
+
+    this.mode = 'spectator';
+
+    this.useShadows = true;
+    this.forceThreeMaterials = false;
+    this.threeMaterials = false;
+
+    this.puckVelocity = new THREE.Vector3();
+
+    this.positionDirty = false;
     this.textureAsset = this.getAssetRegistry().getAsset('5130145701395c872300058a');
     this.textureAsset.load();
     this.detectCapabilities();
     this.getRenderer().shadowMapEnabled = this.useShadows;
+
     //this.getRenderer().shadowMapType = THREE.BasicShadowMap;
     this.initScene(scene);
     this.initInput();
@@ -315,11 +319,13 @@ var GameClient = window.VAPI.VeroldApp.extend({
       puckVelocity = this.physics.getPuckVelocity();
       this.puckVelocity.set(puckVelocity.x, 0, puckVelocity.y);
 
+      /*
       this.puck.traverse(function(obj) {
-        if (obj instanceof MeshObject) {
+        if (obj instanceof VAPI.StaticMeshObject) {
           obj.threeData.material.uniforms.uVelocity.value = that.puckVelocity;
         }
       });
+      */
 
       this.translateObj(this.puck, positions.puck.x, positions.puck.y, true);
       this.translateObj(this.p1Paddle, positions.p1.x, positions.p1.y, this.mode === 'p1' ? false : true);
@@ -394,6 +400,14 @@ var GameClient = window.VAPI.VeroldApp.extend({
       });
     } else if (event.keyCode === keyCodes.M) {
       this.toggleMaterials();
+    }
+  },
+
+  render: function(delta) {
+    if (this.threeScene && this.threeCamera) {
+      var renderer = this.getRenderer();
+
+      renderer.render( this.threeScene, this.threeCamera );
     }
   }
 });

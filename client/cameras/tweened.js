@@ -3,7 +3,7 @@ var TWEEN = require('tween');
 var TweenedCamera = function(targetObj) {
   this.targetObj = targetObj;
 
-  this.camera = new THREE.PerspectiveCamera( 70, this.width / this.height, 0.1, 10000 );
+  this.camera = new THREE.PerspectiveCamera( 70, $(window).width() / $(window).height(), 0.1, 10000 );
   this.camera.up.set( 0, 1, 0 );
   this.camera.position.set( -1.0, 1.8, 0 );
 
